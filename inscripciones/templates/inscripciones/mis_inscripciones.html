@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Mis Inscripciones</h2>
+    <a href="{% url 'crear_inscripcion' %}" class="btn btn-success">Nueva inscripción</a>
+</div>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+  {% for i in inscripciones %}
+    <div class="col">
+      <div class="card shadow-sm">
+        {% if forloop.counter0|divisibleby:4 %}
+            <img src="https://res.cloudinary.com/worldpackers/image/upload/c_limit,f_auto,q_auto,w_1140/z1s2gxqhyciqosbniblt" class="card-img-top" alt="Inscripción 1">
+        {% elif forloop.counter0|divisibleby:3 %}
+            <img src="https://ayudaenaccion.org/uploads/2022/02/dia-voluntariado.jpg" class="card-img-top" alt="Inscripción 2">
+        {% elif forloop.counter0|divisibleby:2 %}
+            <img src="https://media.istockphoto.com/id/1498170916/es/foto/una-pareja-está-llevando-una-bolsa-de-comida-en-el-banco-de-alimentos-y-ropa.jpg?s=612x612&w=0&k=20&c=Od_MukmNnju6Uckva8w_7lok1y9jOO9An-S7oDbr-qI=" class="card-img-top" alt="Inscripción 3">
+        {% else %}
+            <img src="https://www.caritas.org.mx/wp-content/uploads/2021/10/que-es-voluntariado-bg-1.jpg" class="card-img-top" alt="Inscripción 4">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ i.oportunidad.titulo }}</h5>
+          <p class="card-text">Estado: {{ i.estado }}<br>Fecha: {{ i.fecha_inscripcion }}</p>
+          <a href="{% url 'editar_inscripcion' i.pk %}" class="btn btn-warning btn-sm">Editar</a>
+          <a href="{% url 'eliminar_inscripcion' i.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col">
+      <div class="alert alert-info">No tienes inscripciones registradas.</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

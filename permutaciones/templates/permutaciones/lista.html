@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Permutaciones de Participantes</h2>
+    <a href="{% url 'crear_permutacion' %}" class="btn btn-success">Nueva permutación</a>
+</div>
+<ul class="list-group">
+  {% for p in permutaciones %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <span>
+        {{ p.oportunidad.titulo }} - Total: {{ p.total_participantes }} - Permutaciones: {{ p.resultado_permutacion }}
+      </span>
+      <span>
+        <a href="{% url 'editar_permutacion' p.pk %}" class="btn btn-warning btn-sm">Editar</a>
+        <a href="{% url 'eliminar_permutacion' p.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+      </span>
+    </li>
+  {% empty %}
+    <li class="list-group-item">No hay permutaciones registradas.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

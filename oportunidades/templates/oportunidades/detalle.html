@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-sm mx-auto" style="max-width: 600px;">
+    <div class="card-body">
+        <h2 class="card-title">{{ oportunidad.titulo }}</h2>
+        <p>{{ oportunidad.descripcion }}</p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>Organización:</strong> {{ oportunidad.organizacion }}</li>
+            <li class="list-group-item"><strong>Ubicación:</strong> {{ oportunidad.ubicacion }}</li>
+            <li class="list-group-item"><strong>Fechas:</strong> {{ oportunidad.fecha_inicio }} a {{ oportunidad.fecha_fin }}</li>
+            <li class="list-group-item"><strong>Cupos:</strong> {{ oportunidad.cupos }}</li>
+        </ul>
+        <a href="{% url 'editar_oportunidad' oportunidad.pk %}" class="btn btn-warning">Editar</a>
+        <a href="{% url 'eliminar_oportunidad' oportunidad.pk %}" class="btn btn-danger">Eliminar</a>
+        <a href="{% url 'lista_oportunidades' %}" class="btn btn-secondary">Volver</a>
+    </div>
+</div>
+{% endblock %}

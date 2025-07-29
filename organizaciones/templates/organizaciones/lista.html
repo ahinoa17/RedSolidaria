@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Organizaciones</h2>
+    <a href="{% url 'crear_organizacion' %}" class="btn btn-success">Nueva organización</a>
+</div>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+  {% for o in organizaciones %}
+    <div class="col">
+      <div class="card shadow-sm">
+        {% if forloop.counter0|divisibleby:4 %}
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFrqY_lCLsERtCfhLTwEfPNC46CVQzUnbZdQ&s" class="card-img-top" alt="Organización 1">
+        {% elif forloop.counter0|divisibleby:3 %}
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0jAK9VeSfAxc0_kd-U65irHVCU_-mr6Fsxg&s" class="card-img-top" alt="Organización 2">
+        {% elif forloop.counter0|divisibleby:2 %}
+            <img src="https://yfu.org.ec/wp-content/uploads/2018/04/YFU_Icons_volunteers_rgb.jpg" class="card-img-top" alt="Organización 3">
+        {% else %}
+            <img src="https://st.depositphotos.com/1364916/4405/v/450/depositphotos_44053199-stock-illustration-hands-logo-vector.jpg" class="card-img-top" alt="Organización 4">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ o.nombre }}</h5>
+          <p class="card-text">{{ o.descripcion|truncatechars:80 }}</p>
+          <p class="mb-1"><strong>Email:</strong> {{ o.contacto_email }}</p>
+          <a href="{% url 'detalle_organizacion' o.pk %}" class="btn btn-primary btn-sm">Ver</a>
+          <a href="{% url 'editar_organizacion' o.pk %}" class="btn btn-warning btn-sm">Editar</a>
+          <a href="{% url 'eliminar_organizacion' o.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col">
+      <div class="alert alert-info">No hay organizaciones registradas.</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
