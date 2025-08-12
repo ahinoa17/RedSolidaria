@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-sm mx-auto" style="max-width: 600px;">
+    <div class="card-body">
+        <h2 class="card-title">{{ organizacion.nombre }}</h2>
+        <p>{{ organizacion.descripcion }}</p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>Email:</strong> {{ organizacion.contacto_email }}</li>
+            <li class="list-group-item"><strong>Teléfono:</strong> {{ organizacion.telefono }}</li>
+            <li class="list-group-item"><strong>Dirección:</strong> {{ organizacion.direccion }}</li>
+        </ul>
+        <div class="d-flex gap-2">
+            {% if user.is_superuser %}
+            <a href="{% url 'editar_organizacion' organizacion.pk %}" class="btn btn-warning">Editar</a>
+            <a href="{% url 'eliminar_organizacion' organizacion.pk %}" class="btn btn-danger">Eliminar</a>
+            {% endif %}
+            <a href="{% url 'lista_organizaciones' %}" class="btn btn-secondary ms-auto">Volver al listado</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

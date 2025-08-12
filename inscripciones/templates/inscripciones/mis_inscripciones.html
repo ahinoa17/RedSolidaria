@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Mis Inscripciones</h1>
+    
+    {% if inscripciones %}
+        <div class="row">
+            {% for inscripcion in inscripciones %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ inscripcion.oportunidad.titulo }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            {{ inscripcion.oportunidad.organizacion.nombre }}
+                        </h6>
+                        <p class="card-text">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            {{ inscripcion.oportunidad.fecha_inicio|date:"d M Y" }} - 
+                            {{ inscripcion.oportunidad.fecha_fin|date:"d M Y" }}
+                        </p>
+                        <p class="card-text">
+                            <span class="badge bg-{% if inscripcion.estado == 'aprobado' %}success{% elif inscripcion.estado == 'rechazado' %}danger{% else %}warning{% endif %}">
+                                {{ inscripcion.get_estado_display }}
+                            </span>
+                        </p>
+                        <p class="card-text">{{ inscripcion.oportunidad.descripcion|truncatewords:30 }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{% url 'detalle_oportunidad' inscripcion.oportunidad.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i> Ver Detalles
+                        </a>
+                        <form method="post" action="{% url 'inscripciones:eliminar_inscripcion' inscripcion.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                onclick="return confirm('¿Estás seguro de que deseas cancelar esta inscripción?');">
+                                <i class="fas fa-trash-alt me-1"></i> Cancelar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            No tienes inscripciones activas. 
+            <a href="{% url 'lista_oportunidades' %}" class="alert-link">Ver oportunidades disponibles</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

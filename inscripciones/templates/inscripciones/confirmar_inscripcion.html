@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Confirmar Inscripción</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">¿Deseas inscribirte en esta oportunidad?</h5>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ oportunidad.titulo }}</h5>
+                            <p class="card-text">{{ oportunidad.descripcion|truncatewords:30 }}</p>
+                            <p class="mb-1"><strong>Organización:</strong> {{ oportunidad.organizacion }}</p>
+                            <p class="mb-1"><strong>Ubicación:</strong> {{ oportunidad.ubicacion }}</p>
+                            <p class="mb-0"><strong>Fechas:</strong> {{ oportunidad.fecha_inicio|date:"d/m/Y" }} - {{ oportunidad.fecha_fin|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                    
+                    <form method="post" action="{% url 'inscripciones:inscribirse' oportunidad.id %}">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detalle_oportunidad' oportunidad.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-circle me-1"></i> Confirmar Inscripción
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

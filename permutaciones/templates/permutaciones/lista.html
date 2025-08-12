@@ -1,0 +1,182 @@
+<!-- permutaciones/lista.html -->
+{% extends "permutaciones/base_permutaciones.html" %}
+
+{% block permutaciones_content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Intercambiar Mis Turnos</h5>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="recibidas-tab" data-bs-toggle="tab" data-bs-target="#recibidas" type="button" role="tab" aria-controls="recibidas" aria-selected="true">
+                    Recibidas
+                    {% if solicitudes_recibidas.count > 0 %}
+                        <span class="badge bg-danger">{{ solicitudes_recibidas.count }}</span>
+                    {% endif %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="enviadas-tab" data-bs-toggle="tab" data-bs-target="#enviadas" type="button" role="tab" aria-controls="enviadas" aria-selected="false">
+                    Enviadas
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="mis-inscripciones-tab" data-bs-toggle="tab" data-bs-target="#mis-inscripciones" type="button" role="tab" aria-controls="mis-inscripciones" aria-selected="false">
+                    Mis Inscripciones
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content mt-3" id="myTabContent">
+            <!-- Pestaña de Solicitudes Recibidas -->
+            <div class="tab-pane fade show active" id="recibidas" role="tabpanel" aria-labelledby="recibidas-tab">
+                {% if solicitudes_recibidas %}
+                    <div class="list-group">
+                        {% for solicitud in solicitudes_recibidas %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Solicitud de {{ solicitud.solicitante.nombre_completo }}</h6>
+                                    <small class="text-muted">{{ solicitud.fecha_creacion|timesince }}</small>
+                                </div>
+                                <p class="mb-1">
+                                    <strong>Cambio:</strong> {{ solicitud.oportunidad_origen.titulo }} 
+                                    <i class="fas fa-exchange-alt mx-2"></i>
+                                    {{ solicitud.oportunidad_destino.titulo }}
+                                </p>
+                                {% if solicitud.mensaje %}
+                                    <p class="mb-1"><strong>Mensaje:</strong> {{ solicitud.mensaje }}</p>
+                                {% endif %}
+                                <div class="mt-2">
+                                    <a href="{% url 'permutaciones:detalle_solicitud' solicitud.pk %}" class="btn btn-sm btn-primary">
+                                        Ver Detalles
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No tienes solicitudes de permutación recibidas.
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pestaña de Solicitudes Enviadas -->
+            <div class="tab-pane fade" id="enviadas" role="tabpanel" aria-labelledby="enviadas-tab">
+                {% if solicitudes_enviadas %}
+                    <div class="list-group">
+                        {% for solicitud in solicitudes_enviadas %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Solicitud a {{ solicitud.receptor.nombre_completo }}</h6>
+                                    <span class="badge bg-{% if solicitud.estado == 'pendiente' %}warning{% elif solicitud.estado == 'aceptada' %}success{% else %}danger{% endif %}">
+                                        {{ solicitud.get_estado_display }}
+                                    </span>
+                                </div>
+                                <p class="mb-1">
+                                    <strong>Cambio:</strong> {{ solicitud.oportunidad_origen.titulo }} 
+                                    <i class="fas fa-exchange-alt mx-2"></i>
+                                    {{ solicitud.oportunidad_destino.titulo }}
+                                </p>
+                                <div class="mt-2">
+                                    <a href="{% url 'permutaciones:detalle_solicitud' solicitud.pk %}" class="btn btn-sm btn-primary">
+                                        Ver Detalles
+                                    </a>
+                                    {% if solicitud.estado == 'pendiente' %}
+                                        <a href="{% url 'permutaciones:cancelar' solicitud.pk %}" class="btn btn-sm btn-outline-danger">
+                                            Cancelar
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No has enviado solicitudes de intercambio de turnos.
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pestaña de Mis Inscripciones -->
+            <div class="tab-pane fade" id="mis-inscripciones" role="tabpanel" aria-labelledby="mis-inscripciones-tab">
+                {% if oportunidad_actual %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Intercambiando turno: {{ oportunidad_actual.titulo }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Oportunidades disponibles para intercambiar:</h6>
+                            {% if oportunidades_permutables %}
+                                <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
+                                    {% for oportunidad in oportunidades_permutables %}
+                                        <div class="col">
+                                            <div class="card h-100">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{ oportunidad.titulo }}</h5>
+                                                    <p class="card-text">
+                                                        <small class="text-muted">
+                                                            {{ oportunidad.fecha_inicio|date:"d M Y" }} - {{ oportunidad.fecha_fin|date:"d M Y" }}
+                                                        </small>
+                                                    </p>
+                                                    <p class="card-text">{{ oportunidad.descripcion|truncatechars:100 }}</p>
+                                                    <form method="post" action="{% url 'permutaciones:crear' oportunidad_actual.id %}" class="mt-2">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="oportunidad_destino" value="{{ oportunidad.id }}">
+                                                        <button type="submit" class="btn btn-primary btn-sm">
+                                                            <i class="fas fa-exchange-alt"></i> Intercambiar Turno
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    No hay turnos disponibles para intercambiar con esta actividad en este momento.
+                                </div>
+                            {% endif %}
+                            <div class="mt-3">
+                                <a href="{% url 'permutaciones:lista' %}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-arrow-left"></i> Volver a la lista
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% elif mis_inscripciones %}
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for inscripcion in mis_inscripciones %}
+                            <div class="col">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ inscripcion.oportunidad.titulo }}</h5>
+                                        <p class="card-text">{{ inscripcion.oportunidad.descripcion|truncatewords:20 }}</p>
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                {{ inscripcion.oportunidad.fecha_inicio|date:"d/m/Y" }} - {{ inscripcion.oportunidad.fecha_fin|date:"d/m/Y" }}
+                                            </small>
+                                        </p>
+                                        <div class="d-grid gap-2">
+                                            <a href="{% url 'permutaciones:crear' inscripcion.oportunidad.id %}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-exchange-alt"></i> Intercambiar Turno
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No estás inscrito en ninguna oportunidad de voluntariado.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

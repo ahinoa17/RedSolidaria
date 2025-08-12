@@ -1,0 +1,137 @@
+<!-- permutaciones/detalle_solicitud.html -->
+{% extends "permutaciones/base_permutaciones.html" %}
+
+{% block permutaciones_content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Detalle del Intercambio</h5>
+        <span class="badge bg-{% if solicitud.estado == 'pendiente' %}warning{% elif solicitud.estado == 'aceptada' %}success{% else %}danger{% endif %}">
+            {{ solicitud.get_estado_display }}
+        </span>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Oportunidad Actual</h6>
+                    </div>
+                    <div class="card-body">
+                        <h5>{{ solicitud.oportunidad_origen.titulo }}</h5>
+                        <p>{{ solicitud.oportunidad_origen.descripcion|truncatewords:30 }}</p>
+                        <p class="mb-1"><strong>Ubicación:</strong> {{ solicitud.oportunidad_origen.ubicacion }}</p>
+                        <p class="mb-1"><strong>Fechas:</strong> {{ solicitud.oportunidad_origen.fecha_inicio|date:"d/m/Y" }} - {{ solicitud.oportunidad_origen.fecha_fin|date:"d/m/Y" }}</p>
+                        <p class="mb-1"><strong>Horario:</strong> {{ solicitud.oportunidad_origen.horario|default:"No especificado" }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Oportunidad de Intercambio</h6>
+                    </div>
+                    <div class="card-body">
+                        <h5>{{ solicitud.oportunidad_destino.titulo }}</h5>
+                        <p>{{ solicitud.oportunidad_destino.descripcion|truncatewords:30 }}</p>
+                        <p class="mb-1"><strong>Ubicación:</strong> {{ solicitud.oportunidad_destino.ubicacion }}</p>
+                        <p class="mb-1"><strong>Fechas:</strong> {{ solicitud.oportunidad_destino.fecha_inicio|date:"d/m/Y" }} - {{ solicitud.oportunidad_destino.fecha_fin|date:"d/m/Y" }}</p>
+                        <p class="mb-1"><strong>Horario:</strong> {{ solicitud.oportunidad_destino.horario|default:"No especificado" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Información de la Solicitud</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Solicitante</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Nombre:</strong> {{ solicitud.solicitante.nombre_completo }}</p>
+                                    <p class="mb-1"><strong>Email:</strong> {{ solicitud.solicitante.email }}</p>
+                                    <p class="mb-1"><strong>Teléfono:</strong> {{ solicitud.solicitante.telefono|default:"No especificado" }}</p>
+                                    <p class="mb-0"><strong>Fecha de registro:</strong> {{ solicitud.solicitante.date_joined|date:"d/m/Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Receptor</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Nombre:</strong> {{ solicitud.receptor.nombre_completo }}</p>
+                                    <p class="mb-1"><strong>Email:</strong> {{ solicitud.receptor.email }}</p>
+                                    <p class="mb-1"><strong>Teléfono:</strong> {{ solicitud.receptor.telefono|default:"No especificado" }}</p>
+                                    <p class="mb-0"><strong>Fecha de registro:</strong> {{ solicitud.receptor.date_joined|date:"d/m/Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>Estado:</strong> 
+                                <span class="badge bg-{% if solicitud.estado == 'pendiente' %}warning{% elif solicitud.estado == 'aceptada' %}success{% else %}danger{% endif %}">
+                                    {{ solicitud.get_estado_display }}
+                                </span>
+                            </p>
+                            <p class="mb-2"><strong>Fecha de solicitud:</strong> {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                            {% if solicitud.fecha_actualizacion %}
+                                <p class="mb-2"><strong>Última actualización:</strong> {{ solicitud.fecha_actualizacion|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+                            
+                            {% if solicitud.mensaje %}
+                                <div class="alert alert-info mt-3">
+                                    <h6 class="alert-heading">Mensaje del Solicitante:</h6>
+                                    <p class="mb-0">{{ solicitud.mensaje }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="{% url 'permutaciones:lista' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Volver al listado
+            </a>
+            
+            <div class="btn-group">
+                {% if solicitud.estado == 'pendiente' %}
+                    {% if solicitud.receptor == user %}
+                        <form method="post" action="{% url 'permutaciones:aceptar' solicitud.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success" onclick="return confirm('¿Estás seguro de que deseas aceptar esta solicitud?')">
+                                <i class="fas fa-check me-1"></i> Aceptar
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'permutaciones:rechazar' solicitud.pk %}" class="d-inline ms-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas rechazar esta solicitud?')">
+                                <i class="fas fa-times me-1"></i> Rechazar
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'permutaciones:cancelar' solicitud.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('¿Estás seguro de que deseas cancelar esta solicitud?')">
+                                <i class="fas fa-times me-1"></i> Cancelar Solicitud
+                            </button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

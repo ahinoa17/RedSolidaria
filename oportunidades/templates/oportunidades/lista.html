@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Oportunidades de Voluntariado</h1>
+    {% if user.is_superuser %}
+    <a href="{% url 'crear_oportunidad' %}" class="btn btn-success">Nueva oportunidad</a>
+    {% endif %}
+</div>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for o in oportunidades %}
+    <div class="col">
+        <div class="card shadow-sm h-100">
+            {% if forloop.counter0|divisibleby:6 %}
+                <img src="https://bristolenos.com/wp-content/uploads/2016/02/depositphotos_10961975_s.jpg?w=1300" class="card-img-top" alt="Voluntariado 1" style="height: 200px; object-fit: cover;">
+            {% elif forloop.counter0|divisibleby:5 %}
+                <img src="https://r9.ieee.org/ecuador-yp/wp-content/uploads/sites/18/2018/12/10636219_739910989412898_6007121839736226423_n.jpg" class="card-img-top" alt="Voluntariado 2" style="height: 200px; object-fit: cover;">
+            {% elif forloop.counter0|divisibleby:4 %}
+                <img src="https://www.esneca.lat/wp-content/uploads/voluntariado-internacional-1.jpg" class="card-img-top" alt="Voluntariado 3" style="height: 200px; object-fit: cover;">
+            {% elif forloop.counter0|divisibleby:3 %}
+                <img src="https://ceconsulting.es/wp-content/uploads/2022/09/voluntariado-requisitos-legales.jpg" class="card-img-top" alt="Voluntariado 4" style="height: 200px; object-fit: cover;">
+            {% elif forloop.counter0|divisibleby:2 %}
+                <img src="https://educowebmedia.blob.core.windows.net/educowebmedia/educospain/media/images/blog/manos-voluntariado.jpg" class="card-img-top" alt="Voluntariado 5" style="height: 200px; object-fit: cover;">
+            {% else %}
+                <img src="https://fundaciontelefonica.com.ec/wp-content/uploads/2023/03/voluntariado-fundacion-telefonica-1.jpg" class="card-img-top" alt="Voluntariado 6" style="height: 200px; object-fit: cover;">
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ o.titulo }}</h5>
+                <p class="card-text flex-grow-1">{{ o.descripcion|truncatechars:100 }}</p>
+                <p class="mb-1"><strong>Organización:</strong> {{ o.organizacion }}</p>
+                <div class="mt-auto">
+                    <a href="{% url 'detalle_oportunidad' o.pk %}" class="btn btn-primary btn-sm">Ver</a>
+                    {% if user.is_authenticated and not user.is_superuser %}
+                        {% if o.id in inscripciones_usuario %}
+                            <span class="badge bg-secondary">Ya inscrito</span>
+                            <a href="{% url 'permutaciones:lista' %}?oportunidad_id={{ o.id }}" class="btn btn-info btn-sm mt-1">
+                                <i class="fas fa-exchange-alt"></i> Intercambiar
+                            </a>
+                        {% else %}
+                            <a href="{% url 'inscripciones:inscribirse' o.pk %}" class="btn btn-success btn-sm">Inscribirse</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if user.is_superuser %}
+                    <a href="{% url 'editar_oportunidad' o.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'eliminar_oportunidad' o.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col">
+        <div class="alert alert-info">No hay oportunidades registradas.</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

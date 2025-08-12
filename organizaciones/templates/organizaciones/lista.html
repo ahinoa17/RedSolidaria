@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Organizaciones</h2>
+    {% if user.is_superuser %}
+    <a href="{% url 'crear_organizacion' %}" class="btn btn-success">Nueva organización</a>
+    {% endif %}
+</div>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+  {% for o in organizaciones %}
+    <div class="col">
+      <div class="card shadow-sm h-100">
+        {% if o.nombre == 'Fundación Pies Descalzos' %}
+          <img src="{% static 'img/logos/fundacion-pies-descalzos.jpg' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Fundación Teletón' %}
+          <img src="{% static 'img/logos/fundacion-teleton.png' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Aldeas Infantiles SOS' %}
+          <img src="{% static 'img/logos/aldeas-infantiles-sos.jpg' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Fundación Vida Silvestre' %}
+          <img src="{% static 'img/logos/fundacion-vida-silvestre-argentina.jpg' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Fundación Paraguaya' %}
+          <img src="{% static 'img/logos/fundacion-paraguaya.jpg' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Fundación Manos Solidarias' %}
+          <img src="{% static 'img/logos/fundacion-manos-solidarias.png' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Fundación Natura Bolivia' %}
+          <img src="{% static 'img/logos/fundacion-natura-bolivia.jpg' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Cruz Roja Mexicana, I.A.P.' %}
+          <img src="{% static 'img/logos/cruz-roja-mexicana.jpg' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Fundación Pro Vivienda Social' %}
+          <img src="{% static 'img/logos/fundacion-pro-vivienda-social.jpg' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% elif o.nombre == 'Fundación Amigos del Río San Juan (FUNDAR)' %}
+          <img src="{% static 'img/logos/fundacion-amigos-rio-san-juan.jpg' %}" class="card-img-top" alt="{{ o.nombre }}" style="height: 200px; object-fit: cover;">
+        {% else %}
+          <div class="text-center p-4" style="height: 200px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+            <div>
+              <div class="text-muted">Imagen no encontrada para:</div>
+              <div class="text-danger">{{ o.nombre }}</div>
+            </div>
+          </div>
+        {% endif %}
+        
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ o.nombre }}</h5>
+          <p class="card-text flex-grow-1">{{ o.descripcion|truncatechars:80 }}</p>
+          <p class="mb-1"><strong>Email:</strong> {{ o.contacto_email }}</p>
+          <div class="mt-auto">
+            <a href="{% url 'detalle_organizacion' o.pk %}" class="btn btn-primary btn-sm">Ver</a>
+            {% if user.is_superuser %}
+            <a href="{% url 'editar_organizacion' o.pk %}" class="btn btn-warning btn-sm">Editar</a>
+            <a href="{% url 'eliminar_organizacion' o.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col">
+      <div class="alert alert-info">No hay organizaciones registradas.</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

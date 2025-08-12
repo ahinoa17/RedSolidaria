@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center mb-0 py-2">Registro de Voluntario PUCE</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Solo se permiten correos institucionales de la PUCE (@puce.edu.ec o @puce.ec)
+                    </div>
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nombre_completo" class="form-label">Nombre Completo</label>
+                                    <input type="text" 
+                                           name="nombre_completo" 
+                                           class="form-control" 
+                                           id="nombre_completo" 
+                                           required
+                                           pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
+                                           placeholder="Ej: Juan Pérez">
+                                    <div class="invalid-feedback">
+                                        Por favor ingresa tu nombre completo (solo letras y espacios).
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="telefono" class="form-label">Teléfono</label>
+                                    <input type="tel" 
+                                           name="telefono" 
+                                           class="form-control" 
+                                           id="telefono" 
+                                           pattern="^\+?1?\d{9,15}$"
+                                           placeholder="Ej: +593987654321">
+                                    <div class="form-text">Formato: +593987654321</div>
+                                    <div class="invalid-feedback">
+                                        Por favor ingresa un número de teléfono válido (9-15 dígitos).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nombre de Usuario</label>
+                            <input type="text" 
+                                   name="username" 
+                                   class="form-control" 
+                                   id="username" 
+                                   required
+                                   pattern="^[a-zA-Z0-9@.+-_]+$"
+                                   placeholder="Elige un nombre de usuario">
+                            <div class="form-text">Letras, números y @/./+/-/_ solamente.</div>
+                            <div class="invalid-feedback">
+                                Por favor ingresa un nombre de usuario válido.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo Institucional PUCE</label>
+                            <input type="email" 
+                                   name="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   required
+                                   pattern="^[a-zA-Z0-9._%+-]+@(puce\.edu\.ec|puce\.ec)$"
+                                   placeholder="usuario@puce.edu.ec o usuario@puce.ec">
+                            <div class="invalid-feedback">
+                                Por favor ingresa un correo institucional de la PUCE.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password1" class="form-label">Contraseña</label>
+                            <input type="password" 
+                                   name="password1" 
+                                   class="form-control" 
+                                   id="password1" 
+                                   required
+                                   minlength="8"
+                                   placeholder="Crea una contraseña segura">
+                            <div class="form-text">
+                                <small>
+                                    <ul class="mb-0 ps-3">
+                                        <li>Mínimo 8 caracteres</li>
+                                        <li>No puede ser completamente numérica</li>
+                                    </ul>
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password2" class="form-label">Confirmar Contraseña</label>
+                            <input type="password" 
+                                   name="password2" 
+                                   class="form-control" 
+                                   id="password2" 
+                                   required
+                                   placeholder="Vuelve a escribir tu contraseña">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Registrarse
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0">¿Ya tienes una cuenta? 
+                            <a href="{% url 'login' %}" class="text-primary">Inicia sesión aquí</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .card-header {
+        border-bottom: none;
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+    }
+    .form-control {
+        padding: 12px 15px;
+        border-radius: 8px;
+    }
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+</style>
+
+<script>
+// Validación del formulario
+(function () {
+  'use strict'
+  var forms = document.querySelectorAll('.needs-validation')
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+</script>
+{% endblock %}

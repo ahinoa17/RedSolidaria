@@ -1,0 +1,60 @@
+<!-- permutaciones/crear_solicitud.html -->
+{% extends "permutaciones/base_permutaciones.html" %}
+
+{% block permutaciones_content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Solicitar Permutación</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Oportunidad Actual</h6>
+                    </div>
+                    <div class="card-body">
+                        <h5>{{ oportunidad_origen.titulo }}</h5>
+                        <p>{{ oportunidad_origen.descripcion|truncatewords:30 }}</p>
+                        <p class="mb-1"><strong>Ubicación:</strong> {{ oportunidad_origen.ubicacion }}</p>
+                        <p class="mb-1"><strong>Fechas:</strong> {{ oportunidad_origen.fecha_inicio|date:"d/m/Y" }} - {{ oportunidad_origen.fecha_fin|date:"d/m/Y" }}</p>
+                        <p class="mb-0"><strong>Horario:</strong> {{ oportunidad_origen.horario|default:"No especificado" }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Seleccionar Oportunidad de Destino</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="oportunidad_destino" class="form-label">Oportunidad</label>
+                                <select class="form-select" id="oportunidad_destino" name="oportunidad_destino" required>
+                                    <option value="">Selecciona una oportunidad</option>
+                                    {% for oportunidad in oportunidades_destino %}
+                                        <option value="{{ oportunidad.id }}">
+                                            {{ oportunidad.titenda }} - {{ oportunidad.ubicacion }}
+                                            ({{ oportunidad.fecha_inicio|date:"d/m/Y" }} - {{ oportunidad.fecha_fin|date:"d/m/Y" }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mensaje" class="form-label">Mensaje (opcional)</label>
+                                <textarea class="form-control" id="mensaje" name="mensaje" rows="3" placeholder="Explica por qué deseas realizar esta permutación"></textarea>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% url 'permutaciones:lista_permutaciones' %}" class="btn btn-secondary">Cancelar</a>
+                                <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
