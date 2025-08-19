@@ -1,23 +1,35 @@
-<!-- permutaciones/base_permutaciones.html -->
+<!-- Extiende la plantilla base.html del proyecto -->
 {% extends "base.html" %}
 
+<!-- Define el bloque de contenido principal -->
 {% block content %}
+<!-- Contenedor principal con margen superior -->
 <div class="container mt-4">
+    <!-- Fila para el diseño de dos columnas -->
     <div class="row">
+        <!-- Columna izquierda (3/12 del ancho) para el menú lateral -->
         <div class="col-md-3">
+            <!-- Tarjeta del menú lateral -->
             <div class="card">
+                <!-- Encabezado de la tarjeta -->
                 <div class="card-header">
+                    <!-- Ícono y título -->
                     <i class="fas fa-exchange-alt me-2"></i>Intercambiar Turnos
                 </div>
+                <!-- Lista de enlaces de navegación -->
                 <div class="list-group list-group-flush">
+                    <!-- Enlace a la lista de solicitudes -->
                     <a href="{% url 'permutaciones:lista' %}" 
-                       class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'lista' %}active{% endif %}">
+                       class="list-group-item list-group-item-action 
+                       {% if request.resolver_match.url_name == 'lista' %}active{% endif %}">
                         <i class="fas fa-list-ul me-2"></i>Mis Solicitudes de Intercambio
                     </a>
                 </div>
             </div>
         </div>
+        <!-- Columna derecha (9/12 del ancho) para el contenido principal -->
         <div class="col-md-9">
+            <!-- Bloque para el contenido específico de cada página que extienda esta plantilla -->
             {% block permutaciones_content %}
             {% endblock %}
         </div>

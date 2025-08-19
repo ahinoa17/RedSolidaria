@@ -6,3 +6,8 @@ db.sqlite3
 .DS_Store
 *.env
 
+# Archivo .gitignore - Control de versiones
+
+# Este archivo le indica a Git qué archivos y carpetas debe ignorar
+# cuando se realice los commits. Los archivos listados no se subirán al repositorio.
+

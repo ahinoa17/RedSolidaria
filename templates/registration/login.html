@@ -1,24 +1,37 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% comment %}
+Template de inicio de sesión personalizado para RedSolidaria.
+Proporciona un formulario de inicio de sesión con validación.
+{% endcomment %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
+            {# Tarjeta contenedora del formulario #}
             <div class="card shadow">
+                {# Encabezado de la tarjeta #}
                 <div class="card-header bg-primary text-white">
                     <h3 class="text-center mb-0 py-2">Iniciar Sesión</h3>
                 </div>
+                
+                {# Cuerpo de la tarjeta #}
                 <div class="card-body p-4">
+                    {# Muestra mensaje de error si las credenciales son incorrectas #}
                     {% if form.errors %}
                         <div class="alert alert-danger">
                             Usuario o contraseña incorrectos. Por favor, inténtalo de nuevo.
                         </div>
                     {% endif %}
 
+                    {# Formulario de inicio de sesión #}
                     <form method="post" class="needs-validation" novalidate>
+                        {# Token CSRF para protección contra ataques #}
                         {% csrf_token %}
                         
+                        {# Campo de nombre de usuario #}
                         <div class="mb-3">
                             <label for="username" class="form-label">Usuario</label>
                             <input type="text" 
@@ -32,6 +45,7 @@
                             </div>
                         </div>
 
+                        {# Campo de contraseña #}
                         <div class="mb-4">
                             <label for="password" class="form-label">Contraseña</label>
                             <input type="password" 
@@ -45,6 +59,7 @@
                             </div>
                         </div>
 
+                        {# Botón de envío #}
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
@@ -52,6 +67,7 @@
                         </div>
                     </form>
 
+                    {# Enlace a registro para nuevos usuarios #}
                     <div class="text-center mt-4">
                         <p class="mb-2">¿No tienes una cuenta?</p>
                         <a href="{% url 'registro_voluntario' %}" class="btn btn-outline-primary">
@@ -64,18 +80,23 @@
     </div>
 </div>
 
+{# Estilos CSS personalizados #}
 <style>
+    /* Estilo del fondo de la página */
     body {
         background-color: #f8f9fa;
     }
+    /* Estilo de la tarjeta */
     .card {
         border: none;
         border-radius: 10px;
         overflow: hidden;
     }
+    /* Estilo del encabezado de la tarjeta */
     .card-header {
         border-bottom: none;
     }
+    /* Estilo del botón primario */
     .btn-primary {
         background-color: #0d6efd;
         border: none;
@@ -83,31 +104,42 @@
         border-radius: 8px;
         font-weight: 500;
     }
+    /* Efecto hover para el botón primario */
     .btn-primary:hover {
         background-color: #0b5ed7;
     }
+    /* Estilo de los campos de formulario */
     .form-control {
         padding: 12px 15px;
         border-radius: 8px;
     }
+    /* Estilo del foco en los campos de formulario */
     .form-control:focus {
         border-color: #0d6efd;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
 </style>
 
+{# Script para la validación del formulario del lado del cliente #}
 <script>
-// Validación del formulario
+// Patrón de módulo IIFE para evitar la contaminación del ámbito global
 (function () {
-  'use strict'
+  'use strict'  // Habilita el modo estricto de JavaScript
+  
+  // Selecciona todos los formularios con la clase 'needs-validation'
   var forms = document.querySelectorAll('.needs-validation')
+  
+  // Itera sobre cada formulario encontrado
   Array.prototype.slice.call(forms)
     .forEach(function (form) {
+      // Agrega un event listener para el evento submit
       form.addEventListener('submit', function (event) {
+        // Si el formulario no es válido, previene el envío
         if (!form.checkValidity()) {
           event.preventDefault()
           event.stopPropagation()
         }
+        // Agrega la clase 'was-validated' para mostrar los mensajes de validación
         form.classList.add('was-validated')
       }, false)
     })

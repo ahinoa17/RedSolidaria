@@ -1,11 +1,24 @@
+<!-- Extiende la plantilla base del proyecto -->
 {% extends "base.html" %}
+
+<!-- Define el bloque de contenido principal -->
 {% block content %}
+<!-- Tarjeta centrada con sombra y ancho máximo de 400px -->
 <div class="card shadow-sm mx-auto" style="max-width: 400px;">
+    <!-- Cuerpo de la tarjeta -->
     <div class="card-body">
+        <!-- Título de la tarjeta con el nombre de la oportunidad -->
         <h2 class="card-title">¿Eliminar permutación de "{{ permutacion.oportunidad.titulo }}"?</h2>
+        
+        <!-- Formulario para confirmar la eliminación -->
         <form method="post">
+            <!-- Token CSRF para protección contra ataques -->
             {% csrf_token %}
+            
+            <!-- Botón para confirmar la eliminación -->
             <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+            
+            <!-- Enlace para cancelar y volver a la lista -->
             <a href="{% url 'lista_permutaciones' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>

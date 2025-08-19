@@ -1,64 +1,315 @@
+<!-- Extiendo la plantilla base para mantener el diseño consistente -->
 {% extends 'base.html' %}
 
+<!-- Inicio del bloque de contenido principal -->
 {% block content %}
 <div class="container mt-4">
+    <!-- Encabezado con título y botón de volver -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gestión de Inscripciones Pendientes</h2>
+        <h2>Gestión de Inscripciones</h2>
         <a href="{% url 'lista_oportunidades' %}" class="btn btn-outline-primary">
             <i class="fas fa-arrow-left me-1"></i> Volver a Oportunidades
         </a>
     </div>
 
-    {% if inscripciones %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>Voluntario</th>
-                        <th>Oportunidad</th>
-                        <th>Organización</th>
-                        <th>Fecha de Solicitud</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for inscripcion in inscripciones %}
-                    <tr>
-                        <td>
-                            <strong>{{ inscripcion.usuario.get_full_name|default:inscripcion.usuario.username }}</strong>
-                            <div class="text-muted small">{{ inscripcion.usuario.email }}</div>
-                        </td>
-                        <td>{{ inscripcion.oportunidad.titulo }}</td>
-                        <td>{{ inscripcion.oportunidad.organizacion.nombre }}</td>
-                        <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}</td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <form method="post" action="{% url 'inscripciones:aceptar_inscripcion' inscripcion.pk %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-success btn-sm" 
-                                            onclick="return confirm('¿Estás seguro de aceptar esta inscripción?')">
-                                        <i class="fas fa-check me-1"></i> Aceptar
-                                    </button>
-                                </form>
-                                <form method="post" action="{% url 'inscripciones:rechazar_inscripcion' inscripcion.pk %}" class="d-inline ms-1">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm"
-                                            onclick="return confirm('¿Estás seguro de rechazar esta inscripción?')">
-                                        <i class="fas fa-times me-1"></i> Rechazar
-                                    </button>
-                                </form>
+    <!-- Pestañas de navegación para filtrar por estado -->
+    <ul class="nav nav-tabs mb-4" id="inscripcionesTab" role="tablist">
+        <!-- Pestaña de inscripciones pendientes -->
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {% if estado_actual == 'pendiente' %}active{% endif %}" 
+               href="?estado=pendiente" 
+               role="tab">
+                Pendientes
+                {% if contadores.pendiente > 0 %}
+                    <span class="badge bg-warning text-dark ms-1">{{ contadores.pendiente }}</span>
+                {% endif %}
+            </a>
+        </li>
+        
+        <!-- Pestaña de inscripciones aceptadas -->
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {% if estado_actual == 'aceptada' %}active{% endif %}" 
+               href="?estado=aceptada" 
+               role="tab">
+                Aceptadas
+                {% if contadores.aceptada > 0 %}
+                    <span class="badge bg-success ms-1">{{ contadores.aceptada }}</span>
+                {% endif %}
+            </a>
+        </li>
+        
+        <!-- Pestaña de inscripciones rechazadas -->
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {% if estado_actual == 'rechazada' %}active{% endif %}" 
+               href="?estado=rechazada" 
+               role="tab">
+                Rechazadas
+                {% if contadores.rechazada > 0 %}
+                    <span class="badge bg-danger ms-1">{{ contadores.rechazada }}</span>
+                {% endif %}
+            </a>
+        </li>
+        
+        <!-- Pestaña de historial de intercambios -->
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {% if estado_actual == 'historial' %}active{% endif %}" 
+               href="?estado=historial" 
+               role="tab">
+                <i class="fas fa-exchange-alt me-1"></i> Historial de Intercambios
+                {% if contadores.historial > 0 %}
+                    <span class="badge bg-info ms-1">{{ contadores.historial }}</span>
+                {% endif %}
+            </a>
+        </li>
+        
+        <!-- Pestaña para mostrar todas las inscripciones -->
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {% if estado_actual == 'todas' %}active{% endif %}" 
+               href="?estado=todas" 
+               role="tab">
+                Todas
+                <span class="badge bg-secondary ms-1">{{ contadores.total }}</span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- Tarjeta que contiene la tabla de inscripciones -->
+    <div class="card shadow-sm">
+        <!-- Encabezado de la tarjeta con título y contador -->
+        <div class="card-header bg-light">
+            <h5 class="mb-0">{{ titulo_estado }} ({{ inscripciones|length }})</h5>
+        </div>
+        
+        <!-- Cuerpo de la tarjeta -->
+        <div class="card-body p-0">
+            {% if estado_actual == 'historial' %}
+                <!-- Lista de historial de intercambios mejorada -->
+                <div class="list-group list-group-flush">
+                    {% for registro in historial_intercambios %}
+                    <div class="list-group-item border-0 py-3">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="flex-grow-1 me-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge {% if registro.accion == 'aceptacion' %}bg-success{% elif registro.accion == 'rechazo' %}bg-danger{% elif registro.accion == 'cancelacion' %}bg-warning{% else %}bg-secondary{% endif %} me-2">
+                                        {{ registro.get_accion_display }}
+                                    </span>
+                                    <small class="text-muted">{{ registro.fecha|date:"d/m/Y H:i" }}</small>
+                                </div>
+                                
+                                <div class="card bg-light border-0 p-3 mb-2">
+                                    {% for linea in registro.detalles_lines %}
+                                        {% if 'INTERCAMBIO' in linea %}
+                                            <h6 class="fw-bold text-uppercase mb-3">{{ linea|slice:"2:" }}</h6>
+                                        {% elif '•' in linea %}
+                                            {% if 'Detalles del Intercambio' in linea %}
+                                                <h6 class="fw-bold mt-3 mb-2">{{ linea|slice:"2:" }}</h6>
+                                            {% else %}
+                                                <p class="mb-1">{{ linea|slice:"2:" }}</p>
+                                            {% endif %}
+                                        {% elif linea.strip and '→' in linea %}
+                                            <div class="d-flex align-items-center mb-2 ms-3">
+                                                <i class="fas fa-arrow-right text-primary me-2"></i>
+                                                <span>{{ linea|slice:"2:" }}</span>
+                                            </div>
+                                        {% elif linea.strip %}
+                                            <p class="mb-1">{{ linea }}</p>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    <span>{% if registro.usuario %}{{ registro.usuario.get_full_name|default:registro.usuario.email }}{% else %}Sistema{% endif %}</span>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}<hr class="my-1">{% endif %}
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <div class="text-muted">
+                            <i class="fas fa-exchange-alt fa-3x mb-3"></i>
+                            <p class="mb-0">No hay registros de intercambios</p>
+                        </div>
+                    </div>
                     {% endfor %}
-                </tbody>
-            </table>
+                </div>
+            {% elif inscripciones %}
+                <!-- Tabla de inscripciones -->
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Voluntario</th>
+                                <th>Oportunidad</th>
+                                <th>Organización</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inscripcion in inscripciones %}
+                            <!-- Fila con estilo condicional según el estado -->
+                            <tr class="{% if inscripcion.estado == 'aceptada' %}table-success{% elif inscripcion.estado == 'rechazada' %}table-light text-muted{% endif %}">
+                                <!-- Columna de información del voluntario -->
+                                <td style="min-width: 200px;">
+                                    <div class="fw-bold text-nowrap">
+                                        {{ inscripcion.usuario.nombre_completo|default:inscripcion.usuario.email }}
+                                    </div>
+                                    <div class="text-muted small text-truncate" style="max-width: 200px;">
+                                        {{ inscripcion.usuario.email }}
+                                    </div>
+                                </td>
+                                
+                                <!-- Columna de la oportunidad con enlace -->
+                                <td>
+                                    <a href="{% url 'detalle_oportunidad' inscripcion.oportunidad.id %}" 
+                                       class="text-decoration-none">
+                                        {{ inscripcion.oportunidad.titulo|truncatechars:30 }}
+                                    </a>
+                                </td>
+                                
+                                <!-- Columna de la organización -->
+                                <td>{{ inscripcion.oportunidad.organizacion.nombre }}</td>
+                                
+                                <!-- Columna de fecha formateada -->
+                                <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}</td>
+                                
+                                <!-- Columna de estado con badge -->
+                                <td>
+                                    <span class="badge 
+                                        {% if inscripcion.estado == 'aceptada' %}bg-success
+                                        {% elif inscripcion.estado == 'pendiente' %}bg-warning text-dark
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ inscripcion.get_estado_display }}
+                                    </span>
+                                </td>
+                                
+                                <!-- Columna de acciones -->
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        {% if inscripcion.estado == 'pendiente' %}
+                                            <!-- Formulario para aceptar inscripción -->
+                                            <form method="post" 
+                                                  action="{% url 'inscripciones:aceptar_inscripcion' inscripcion.pk %}" 
+                                                  class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" 
+                                                        class="btn btn-sm btn-outline-success" 
+                                                        title="Aceptar inscripción"
+                                                        onclick="return confirm('¿Estás seguro de aceptar esta inscripción?')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Formulario para rechazar inscripción -->
+                                            <form method="post" 
+                                                  action="{% url 'inscripciones:rechazar_inscripcion' inscripcion.pk %}" 
+                                                  class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" 
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        title="Rechazar inscripción"
+                                                        onclick="return confirm('¿Estás seguro de rechazar esta inscripción?')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <!-- Muestra cuánto tiempo ha pasado desde la actualización -->
+                                            <span class="text-muted small">
+                                                {{ inscripcion.fecha_actualizacion|timesince }} atrás
+                                            </span>
+                                        {% endif %}
+                                        
+                                        <!-- Botón para ver la oportunidad -->
+                                        <a href="{% url 'detalle_oportunidad' inscripcion.oportunidad.id %}" 
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Ver oportunidad">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <!-- Mensaje cuando no hay inscripciones -->
+                <div class="text-center py-5">
+                    <div class="text-muted mb-3">
+                        <i class="fas fa-inbox fa-3x"></i>
+                    </div>
+                    <h5>No hay inscripciones {{ titulo_estado|lower }}</h5>
+                    <p class="text-muted">
+                        {% if estado_actual == 'pendiente' %}
+                            No hay inscripciones pendientes por revisar en este momento.
+                        {% else %}
+                            No se encontraron inscripciones con el estado seleccionado.
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
         </div>
-    {% else %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            No hay inscripciones pendientes por revisar.
-        </div>
-    {% endif %}
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para el historial de intercambios */
+    .historial-item {
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+    .historial-item:hover {
+        background-color: #f8f9fa;
+    }
+    .historial-item.aceptada {
+        border-left-color: #198754;
+    }
+    .historial-item.rechazada {
+        border-left-color: #dc3545;
+    }
+    .historial-item.cancelada {
+        border-left-color: #ffc107;
+    }
+    .historial-detalle {
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+    /* Estilo para las pestañas de navegación */
+    .nav-tabs .nav-link {
+        color: #495057;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding: 0.75rem 1.25rem;
+        font-weight: 500;
+    }
+    
+    /* Estilo para la pestaña activa */
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        background-color: transparent;
+        border-color: #0d6efd;
+        font-weight: 600;
+    }
+    
+    /* Efecto hover en las pestañas */
+    .nav-tabs .nav-link:hover {
+        border-color: #e9ecef #e9ecef #dee2e6;
+    }
+    
+    /* Estilo para los encabezados de la tabla */
+    .table th {
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        border-top: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
 {% endblock %}

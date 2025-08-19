@@ -1,20 +1,52 @@
+<!-- Hereda de la plantilla base.html -->
 {% extends "base.html" %}
+
+<!-- Bloque de contenido principal -->
 {% block content %}
+<!-- Tarjeta con sombra y ancho máximo de 600px -->
 <div class="card shadow-sm mx-auto" style="max-width: 600px;">
     <div class="card-body">
+        <!-- Título con el nombre de la organización -->
         <h2 class="card-title">{{ organizacion.nombre }}</h2>
+        
+        <!-- Descripción de la organización -->
         <p>{{ organizacion.descripcion }}</p>
+        
+        <!-- Lista de información de contacto -->
         <ul class="list-group list-group-flush mb-3">
-            <li class="list-group-item"><strong>Email:</strong> {{ organizacion.contacto_email }}</li>
-            <li class="list-group-item"><strong>Teléfono:</strong> {{ organizacion.telefono }}</li>
-            <li class="list-group-item"><strong>Dirección:</strong> {{ organizacion.direccion }}</li>
+            <li class="list-group-item">
+                <strong>Email:</strong> {{ organizacion.contacto_email }}
+            </li>
+            <li class="list-group-item">
+                <strong>Teléfono:</strong> {{ organizacion.telefono|default:"No especificado" }}
+            </li>
+            <li class="list-group-item">
+                <strong>Dirección:</strong> {{ organizacion.direccion|default:"No especificada" }}
+            </li>
         </ul>
+        
+        <!-- Contenedor flexible para los botones de acción -->
         <div class="d-flex gap-2">
+            <!-- Botones solo visibles para superusuarios -->
             {% if user.is_superuser %}
-            <a href="{% url 'editar_organizacion' organizacion.pk %}" class="btn btn-warning">Editar</a>
-            <a href="{% url 'eliminar_organizacion' organizacion.pk %}" class="btn btn-danger">Eliminar</a>
+                <!-- Botón para editar -->
+                <a href="{% url 'editar_organizacion' organizacion.pk %}" 
+                   class="btn btn-warning">
+                    Editar
+                </a>
+                
+                <!-- Botón para eliminar -->
+                <a href="{% url 'eliminar_organizacion' organizacion.pk %}" 
+                   class="btn btn-danger">
+                    Eliminar
+                </a>
             {% endif %}
-            <a href="{% url 'lista_organizaciones' %}" class="btn btn-secondary ms-auto">Volver al listado</a>
+            
+            <!-- Botón para volver al listado (alineado a la derecha) -->
+            <a href="{% url 'lista_organizaciones' %}" 
+               class="btn btn-secondary ms-auto">
+                Volver al listado
+            </a>
         </div>
     </div>
 </div>

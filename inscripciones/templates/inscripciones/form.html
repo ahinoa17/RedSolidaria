@@ -1,14 +1,35 @@
+<!-- Extiendo la plantilla base para mantener la consistencia del diseño -->
 {% extends "base.html" %}
+
+<!-- Inicio del bloque de contenido principal -->
 {% block content %}
+<!-- Tarjeta centrada con ancho máximo de 500px y sombra suave -->
 <div class="card shadow-sm mx-auto" style="max-width: 500px;">
     <div class="card-body">
-        <h2 class="card-title mb-4">{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Inscripción</h2>
+        <!-- Título dinámico que cambia entre "Editar" y "Nueva" según el contexto -->
+        <h2 class="card-title mb-4">
+            {% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Inscripción
+        </h2>
+        
+        <!-- Formulario para crear o editar una inscripción -->
         <form method="post">
+            <!-- Token de seguridad CSRF obligatorio en Django -->
             {% csrf_token %}
+            
+            <!-- Renderiza todos los campos del formulario automáticamente -->
             {{ form.as_p }}
+            
+            <!-- Contenedor flexible para los botones de acción -->
             <div class="d-flex justify-content-between mt-3">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="{% url 'mis_inscripciones' %}" class="btn btn-secondary">Cancelar</a>
+                <!-- Botón para guardar los cambios -->
+                <button type="submit" class="btn btn-primary">
+                    Guardar
+                </button>
+                
+                <!-- Enlace para cancelar y volver a la lista de inscripciones -->
+                <a href="{% url 'mis_inscripciones' %}" class="btn btn-secondary">
+                    Cancelar
+                </a>
             </div>
         </form>
     </div>

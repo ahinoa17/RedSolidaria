@@ -1,16 +1,24 @@
-<!-- permutaciones/detalle_solicitud.html -->
+<!-- Extiende la plantilla base de permutaciones -->
 {% extends "permutaciones/base_permutaciones.html" %}
 
+<!-- Bloque de contenido específico para esta página -->
 {% block permutaciones_content %}
+<!-- Tarjeta principal -->
 <div class="card">
+    <!-- Encabezado con título y estado -->
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Detalle del Intercambio</h5>
+        <!-- Badge de estado con color dinámico según el estado -->
         <span class="badge bg-{% if solicitud.estado == 'pendiente' %}warning{% elif solicitud.estado == 'aceptada' %}success{% else %}danger{% endif %}">
             {{ solicitud.get_estado_display }}
         </span>
     </div>
+    
+    <!-- Cuerpo de la tarjeta -->
     <div class="card-body">
+        <!-- Fila con dos columnas para mostrar las oportunidades -->
         <div class="row">
+            <!-- Columna izquierda: Oportunidad actual -->
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header bg-light">
@@ -25,6 +33,8 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Columna derecha: Oportunidad de intercambio -->
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header bg-light">
@@ -41,13 +51,16 @@
             </div>
         </div>
         
+        <!-- Sección de información de la solicitud -->
         <div class="mt-4">
             <div class="card">
                 <div class="card-header bg-light">
                     <h6 class="mb-0">Información de la Solicitud</h6>
                 </div>
                 <div class="card-body">
+                    <!-- Información de los usuarios involucrados -->
                     <div class="row">
+                        <!-- Información del solicitante -->
                         <div class="col-md-6">
                             <div class="card mb-3">
                                 <div class="card-header bg-light">
@@ -61,6 +74,8 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Información del receptor -->
                         <div class="col-md-6">
                             <div class="card mb-3">
                                 <div class="card-header bg-light">
@@ -76,19 +91,24 @@
                         </div>
                     </div>
                     
+                    <!-- Detalles adicionales de la solicitud -->
                     <div class="card">
                         <div class="card-body">
+                            <!-- Estado actual -->
                             <p class="mb-2">
                                 <strong>Estado:</strong> 
                                 <span class="badge bg-{% if solicitud.estado == 'pendiente' %}warning{% elif solicitud.estado == 'aceptada' %}success{% else %}danger{% endif %}">
                                     {{ solicitud.get_estado_display }}
                                 </span>
                             </p>
+                            
+                            <!-- Fechas importantes -->
                             <p class="mb-2"><strong>Fecha de solicitud:</strong> {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</p>
                             {% if solicitud.fecha_actualizacion %}
                                 <p class="mb-2"><strong>Última actualización:</strong> {{ solicitud.fecha_actualizacion|date:"d/m/Y H:i" }}</p>
                             {% endif %}
                             
+                            <!-- Mensaje opcional del solicitante -->
                             {% if solicitud.mensaje %}
                                 <div class="alert alert-info mt-3">
                                     <h6 class="alert-heading">Mensaje del Solicitante:</h6>
@@ -101,14 +121,18 @@
             </div>
         </div>
         
+        <!-- Sección de botones de acción -->
         <div class="mt-4 d-flex justify-content-between">
+            <!-- Botón para volver al listado -->
             <a href="{% url 'permutaciones:lista' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Volver al listado
             </a>
             
+            <!-- Acciones disponibles según el estado de la solicitud -->
             <div class="btn-group">
                 {% if solicitud.estado == 'pendiente' %}
                     {% if solicitud.receptor == user %}
+                        <!-- Botones para el receptor -->
                         <form method="post" action="{% url 'permutaciones:aceptar' solicitud.pk %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-success" onclick="return confirm('¿Estás seguro de que deseas aceptar esta solicitud?')">
@@ -122,6 +146,7 @@
                             </button>
                         </form>
                     {% else %}
+                        <!-- Botón para el solicitante -->
                         <form method="post" action="{% url 'permutaciones:cancelar' solicitud.pk %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-danger" onclick="return confirm('¿Estás seguro de que deseas cancelar esta solicitud?')">

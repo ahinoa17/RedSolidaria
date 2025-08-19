@@ -1,11 +1,22 @@
+<!-- Extiendo la plantilla base para mantener el diseño consistente -->
 {% extends "base.html" %}
+
+<!-- Defino el contenido que irá dentro del bloque 'content' de la plantilla base -->
 {% block content %}
+<!-- Creo una tarjeta con sombra que se centrará en la página -->
 <div class="card shadow-sm mx-auto" style="max-width: 400px;">
     <div class="card-body">
+        <!-- Muestro el título de la oportunidad que se va a eliminar -->
         <h2 class="card-title">¿Eliminar inscripción a "{{ inscripcion.oportunidad.titulo }}"?</h2>
+        
+        <!-- Formulario para confirmar la eliminación -->
         <form method="post">
-            {% csrf_token %}
+            {% csrf_token %}  <!-- Token de seguridad obligatorio en Django -->
+            
+            <!-- Botón para confirmar la eliminación -->
             <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+            
+            <!-- Enlace para cancelar y volver a la lista de inscripciones -->
             <a href="{% url 'mis_inscripciones' %}" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>

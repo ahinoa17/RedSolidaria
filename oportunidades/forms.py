@@ -1,3 +1,4 @@
+# Importaciones necesarias
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -51,17 +52,9 @@ class OportunidadVoluntariadoForm(forms.ModelForm):
     class Meta:
         model = OportunidadVoluntariado
         fields = [
-            'titulo', 
-            'descripcion', 
-            'organizacion', 
-            'ubicacion', 
-            'fecha_inicio', 
-            'fecha_fin',
-            'horario',
-            'requisitos',
-            'beneficios',
-            'cupos',
-            'estado'
+            'titulo', 'descripcion', 'organizacion', 'ubicacion', 
+            'fecha_inicio', 'fecha_fin', 'horario', 'requisitos',
+            'beneficios', 'cupos', 'estado'
         ]
         widgets = {
             'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -81,48 +74,38 @@ class OportunidadVoluntariadoForm(forms.ModelForm):
         }
 
     def clean_titulo(self):
+        """Valida que el título tenga al menos 2 palabras de 3 caracteres cada una."""
         titulo = self.cleaned_data.get('titulo', '')
-        try:
-            return validar_texto_con_sentido(
-                titulo,
-                "título",
-                min_palabras=2,
-                min_caracteres=3
-            )
-        except ValidationError as e:
-            raise ValidationError(str(e))
+        return validar_texto_con_sentido(titulo, "título", min_palabras=2, min_caracteres=3)
 
     def clean_ubicacion(self):
+        """Valida que la ubicación sea un texto con sentido."""
         ubicacion = self.cleaned_data.get('ubicacion', '')
-        try:
-            return validar_texto_con_sentido(
-                ubicacion,
-                "ubicación",
-                min_palabras=2,
-                min_caracteres=3
-            )
-        except ValidationError as e:
-            raise ValidationError(str(e))
+        return validar_texto_con_sentido(ubicacion, "ubicación", min_palabras=2, min_caracteres=3)
 
     def clean_descripcion(self):
+        """Valida que la descripción tenga al menos 30 caracteres."""
         descripcion = self.cleaned_data.get('descripcion', '').strip()
         if len(descripcion) < 30:
             raise ValidationError("La descripción debe tener al menos 30 caracteres.")
         return descripcion
 
     def clean_requisitos(self):
+        """Valida que los requisitos tengan al menos 20 caracteres."""
         requisitos = self.cleaned_data.get('requisitos', '').strip()
         if len(requisitos) < 20:
             raise ValidationError("Por favor, proporcione una lista detallada de requisitos (mínimo 20 caracteres).")
         return requisitos
 
     def clean_beneficios(self):
+        """Valida que los beneficios tengan al menos 20 caracteres."""
         beneficios = self.cleaned_data.get('beneficios', '').strip()
         if len(beneficios) < 20:
             raise ValidationError("Por favor, describa los beneficios ofrecidos (mínimo 20 caracteres).")
         return beneficios
 
     def clean_horario(self):
+        """Valida que el horario tenga al menos 10 caracteres."""
         horario = self.cleaned_data.get('horario', '').strip()
         if not horario:
             raise ValidationError("Este campo es obligatorio.")
@@ -131,12 +114,14 @@ class OportunidadVoluntariadoForm(forms.ModelForm):
         return horario
 
     def clean_cupos(self):
+        """Valida que el número de cupos sea mayor a cero."""
         cupos = self.cleaned_data.get('cupos', 0)
         if cupos <= 0:
             raise ValidationError("El número de cupos debe ser mayor a cero.")
         return cupos
 
     def clean(self):
+        """Valida las relaciones entre campos, como fechas de inicio y fin."""
         cleaned_data = super().clean()
         fecha_inicio = cleaned_data.get('fecha_inicio')
         fecha_fin = cleaned_data.get('fecha_fin')

@@ -1,23 +1,38 @@
+{% comment %}
+Template de registro de voluntarios para RedSolidaria.
+Extiende la plantilla base y proporciona un formulario de registro con validación.
+Solo permite correos institucionales de la PUCE.
+{% endcomment %}
+
 {% extends "base.html" %}
+{# Carga las etiquetas estáticas para usar archivos estáticos #}
 {% load static %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
+            {# Tarjeta contenedora del formulario #}
             <div class="card shadow">
+                {# Encabezado de la tarjeta #}
                 <div class="card-header bg-primary text-white">
                     <h3 class="text-center mb-0 py-2">Registro de Voluntario PUCE</h3>
                 </div>
+                
+                {# Cuerpo de la tarjeta #}
                 <div class="card-body p-4">
+                    {# Alerta informativa sobre correos institucionales #}
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
                         Solo se permiten correos institucionales de la PUCE (@puce.edu.ec o @puce.ec)
                     </div>
 
+                    {# Formulario de registro #}
                     <form method="post" class="needs-validation" novalidate>
+                        {# Token CSRF para protección contra ataques #}
                         {% csrf_token %}
                         
+                        {# Muestra errores del formulario si existen #}
                         {% if form.errors %}
                             <div class="alert alert-danger">
                                 {% for field, errors in form.errors.items %}
@@ -28,6 +43,7 @@
                             </div>
                         {% endif %}
 
+                        {# Fila para campos de nombre y teléfono #}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -44,6 +60,7 @@
                                     </div>
                                 </div>
                             </div>
+                            
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="telefono" class="form-label">Teléfono</label>
@@ -61,6 +78,7 @@
                             </div>
                         </div>
 
+                        {# Campo de nombre de usuario #}
                         <div class="mb-3">
                             <label for="username" class="form-label">Nombre de Usuario</label>
                             <input type="text" 
@@ -68,7 +86,7 @@
                                    class="form-control" 
                                    id="username" 
                                    required
-                                   pattern="^[a-zA-Z0-9@.+-_]+$"
+                                   pattern="^[a-zA-Z0-9@.+\-_]+$"
                                    placeholder="Elige un nombre de usuario">
                             <div class="form-text">Letras, números y @/./+/-/_ solamente.</div>
                             <div class="invalid-feedback">
@@ -76,6 +94,7 @@
                             </div>
                         </div>
 
+                        {# Campo de correo institucional #}
                         <div class="mb-3">
                             <label for="email" class="form-label">Correo Institucional PUCE</label>
                             <input type="email" 
@@ -90,6 +109,7 @@
                             </div>
                         </div>
 
+                        {# Campo de contraseña #}
                         <div class="mb-3">
                             <label for="password1" class="form-label">Contraseña</label>
                             <input type="password" 
@@ -109,6 +129,7 @@
                             </div>
                         </div>
 
+                        {# Campo de confirmación de contraseña #}
                         <div class="mb-4">
                             <label for="password2" class="form-label">Confirmar Contraseña</label>
                             <input type="password" 
@@ -119,6 +140,7 @@
                                    placeholder="Vuelve a escribir tu contraseña">
                         </div>
 
+                        {# Botón de envío #}
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-user-plus me-2"></i>Registrarse
@@ -126,6 +148,7 @@
                         </div>
                     </form>
 
+                    {# Enlace a inicio de sesión para usuarios existentes #}
                     <div class="text-center mt-4">
                         <p class="mb-0">¿Ya tienes una cuenta? 
                             <a href="{% url 'login' %}" class="text-primary">Inicia sesión aquí</a>
@@ -137,18 +160,26 @@
     </div>
 </div>
 
+{# Estilos CSS personalizados #}
 <style>
+    /* Estilo del fondo de la página */
     body {
         background-color: #f8f9fa;
     }
+    
+    /* Estilo de la tarjeta */
     .card {
         border: none;
         border-radius: 10px;
         overflow: hidden;
     }
+    
+    /* Estilo del encabezado de la tarjeta */
     .card-header {
         border-bottom: none;
     }
+    
+    /* Estilo del botón primario */
     .btn-primary {
         background-color: #0d6efd;
         border: none;
@@ -156,31 +187,45 @@
         border-radius: 8px;
         font-weight: 500;
     }
+    
+    /* Efecto hover para el botón primario */
     .btn-primary:hover {
         background-color: #0b5ed7;
     }
+    
+    /* Estilo de los campos de formulario */
     .form-control {
         padding: 12px 15px;
         border-radius: 8px;
     }
+    
+    /* Estilo del foco en los campos de formulario */
     .form-control:focus {
         border-color: #0d6efd;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
 </style>
 
+{# Script para la validación del formulario del lado del cliente #}
 <script>
-// Validación del formulario
+// Patrón de módulo IIFE para evitar la contaminación del ámbito global
 (function () {
-  'use strict'
+  'use strict'  // Habilita el modo estricto de JavaScript
+  
+  // Selecciona todos los formularios con la clase 'needs-validation'
   var forms = document.querySelectorAll('.needs-validation')
+  
+  // Itera sobre cada formulario encontrado
   Array.prototype.slice.call(forms)
     .forEach(function (form) {
+      // Agrega un event listener para el evento submit
       form.addEventListener('submit', function (event) {
+        // Si el formulario no es válido, previene el envío
         if (!form.checkValidity()) {
           event.preventDefault()
           event.stopPropagation()
         }
+        // Agrega la clase 'was-validated' para mostrar los mensajes de validación
         form.classList.add('was-validated')
       }, false)
     })

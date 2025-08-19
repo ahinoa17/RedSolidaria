@@ -38,13 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-     #apps
-    'usuarios',
-    'oportunidades',
-    'inscripciones',
-    'organizaciones',
-    'reportes',
-    'permutaciones',
+    # Aplicaciones locales del proyecto
+    'usuarios',           # Gestión de perfiles de usuarios y autenticación
+    'oportunidades',      # Publicación y gestión de oportunidades de voluntariado
+    'inscripciones',      # Sistema de inscripción a oportunidades de voluntariado
+    'organizaciones',     # Gestión de organizaciones que publican oportunidades
+    'permutaciones',      # Sistema de intercambio de turnos entre voluntarios
 ]
 
 MIDDLEWARE = [
@@ -54,42 +53,51 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'usuarios.acceso_admin.ControlAccesoAdmin',  # Debe ir después de AuthenticationMiddleware y MessageMiddleware
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Define el módulo Python que contiene las URL raíz del proyecto
+# Apunta al archivo urls.py en el directorio del proyecto principal
 ROOT_URLCONF = 'RedSolidaria.urls'
 
+# Configuración de plantillas de Django
 TEMPLATES = [
     {
+        # Motor de plantillas de Django
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        # Directorios donde buscar plantillas (además de los de las aplicaciones)
         'DIRS': [BASE_DIR / 'templates'],
+        # Buscar plantillas en los directorios 'templates' de las aplicaciones
         'APP_DIRS': True,
         'OPTIONS': {
+            # Procesadores de contexto que añaden variables al contexto de las plantillas
             'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'inscripciones.context_processors.inscripciones_pendientes',
+                'django.template.context_processors.debug',      # Información de depuración
+                'django.template.context_processors.request',    # Objeto request en plantillas
+                'django.contrib.auth.context_processors.auth',   # Información de autenticación
+                'django.contrib.messages.context_processors.messages',  # Sistema de mensajes
+                'inscripciones.context_processors.inscripciones_pendientes',  # Procesador personalizado
             ],
         },
     },
 ]
 
+# Configuración de la aplicación WSGI para el despliegue en producción
+# Punto de entrada para servidores web compatibles con WSGI
 WSGI_APPLICATION = 'RedSolidaria.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+# Configuración de la base de datos
+# Documentación: https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': {
+        # Motor de base de datos: PostgreSQL
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'RedSolidaria',
-        'USER': 'ahinoaandino',
-        'PASSWORD': '123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'RedSolidaria',      # Nombre de la base de datos
+        'USER': 'ahinoaandino',      # Usuario de la base de datos
+        'PASSWORD': '123',           # Contraseña del usuario
+        'HOST': 'localhost',         # Servidor de la base de datos
+        'PORT': '5432',              # Puerto de conexión a PostgreSQL
     }
 }
 
@@ -128,22 +136,49 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+# Configuración de archivos estáticos (CSS, JavaScript, imágenes)
+# URL base para archivos estáticos (se usa en plantillas con {% static %})
 STATIC_URL = 'static/'
+# Directorios adicionales donde Django buscará archivos estáticos
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Media files (no se usan en este proyecto)
+# Configuración de zona horaria
+TIME_ZONE = 'America/Guayaquil'  # Zona horaria de Ecuador
+USE_TZ = True  # Usar zona horaria
 
-# Default primary key field type
+# Configuración del campo de clave primaria por defecto para los modelos
+# Usa BigAutoField como tipo de campo predeterminado para las claves primarias
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Login/Logout URLs
-LOGIN_REDIRECT_URL = 'home'
+# Configuración de URLs de autenticación
+# URL a la que se redirige después de un inicio de sesión exitoso
+LOGIN_REDIRECT_URL = 'home'  # La vista home ahora manejará la redirección a admin si es necesario
+# URL a la que se redirige después de cerrar sesión
 LOGOUT_REDIRECT_URL = 'login'
+# URL de la página de inicio de sesión (usada por el decorador @login_required)
 LOGIN_URL = 'login'
 
-# Custom user model
+# Modelo de usuario personalizado
+# Especifica el modelo de usuario personalizado que extiende AbstractUser
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-# Archivos multimedia
+# Configuración de archivos multimedia (subidos por usuarios)
+# URL base para servir archivos multimedia
 MEDIA_URL = '/media/'
+# Ruta del sistema de archivos donde se almacenarán los archivos multimedia
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Configuración de mensajes
+from django.contrib.messages import constants as message_constants
+MESSAGE_LEVEL = message_constants.DEBUG  # Nivel más bajo para desarrollo
+
+MESSAGE_TAGS = {
+    message_constants.DEBUG: 'alert-secondary',
+    message_constants.INFO: 'alert-info',
+    message_constants.SUCCESS: 'alert-success',
+    message_constants.WARNING: 'alert-warning',
+    message_constants.ERROR: 'alert-danger',
+}
+
+# Configuración de almacenamiento de mensajes
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

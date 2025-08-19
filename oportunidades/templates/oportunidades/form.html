@@ -1,15 +1,19 @@
+{# Extiende la plantilla base.html #}
 {% extends "base.html" %}
 
+{# Define el bloque de contenido principal #}
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card shadow-sm">
                 <div class="card-body">
+                    {# Título dinámico basado en si es edición o creación #}
                     <h2 class="card-title mb-4">
                         {% if form.instance.pk %}Editar{% else %}Crear{% endif %} Oportunidad
                     </h2>
                     
+                    {# Muestra errores generales del formulario #}
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger">
                             {% for error in form.non_field_errors %}
@@ -18,12 +22,13 @@
                         </div>
                     {% endif %}
 
+                    {# Formulario principal #}
                     <form method="post" class="needs-validation" novalidate>
                         {% csrf_token %}
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <!-- Título -->
+                                {# Campo: Título #}
                                 <div class="mb-3">
                                     <label for="{{ form.titulo.id_for_label }}" class="form-label">Título *</label>
                                     {{ form.titulo }}
@@ -34,7 +39,7 @@
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Organización -->
+                                {# Campo: Organización #}
                                 <div class="mb-3">
                                     <label for="{{ form.organizacion.id_for_label }}" class="form-label">Organización *</label>
                                     {{ form.organizacion }}
@@ -45,7 +50,7 @@
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Ubicación -->
+                                {# Campo: Ubicación #}
                                 <div class="mb-3">
                                     <label for="{{ form.ubicacion.id_for_label }}" class="form-label">Ubicación *</label>
                                     {{ form.ubicacion }}
@@ -56,7 +61,7 @@
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Fechas -->
+                                {# Campos de Fechas #}
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">Fecha de inicio *</label>
@@ -78,7 +83,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Horario -->
+                                {# Campo: Horario #}
                                 <div class="mb-3">
                                     <label for="{{ form.horario.id_for_label }}" class="form-label">Horario *</label>
                                     {{ form.horario }}
@@ -92,7 +97,7 @@
                             </div>
                             
                             <div class="col-md-6">
-                                <!-- Cupos -->
+                                {# Campo: Cupos #}
                                 <div class="mb-3">
                                     <label for="{{ form.cupos.id_for_label }}" class="form-label">Cupos disponibles *</label>
                                     {{ form.cupos }}
@@ -103,7 +108,7 @@
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Estado -->
+                                {# Campo: Estado #}
                                 <div class="mb-3">
                                     <label for="{{ form.estado.id_for_label }}" class="form-label">Estado *</label>
                                     {{ form.estado }}
@@ -114,7 +119,7 @@
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Requisitos -->
+                                {# Campo: Requisitos #}
                                 <div class="mb-3">
                                     <label for="{{ form.requisitos.id_for_label }}" class="form-label">Requisitos *</label>
                                     {{ form.requisitos }}
@@ -126,7 +131,7 @@
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Beneficios -->
+                                {# Campo: Beneficios #}
                                 <div class="mb-3">
                                     <label for="{{ form.beneficios.id_for_label }}" class="form-label">Beneficios *</label>
                                     {{ form.beneficios }}
@@ -139,7 +144,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Descripción -->
+                            {# Campo: Descripción (ancho completo) #}
                             <div class="col-12 mb-3">
                                 <label for="{{ form.descripcion.id_for_label }}" class="form-label">Descripción *</label>
                                 {{ form.descripcion }}
@@ -151,6 +156,7 @@
                             </div>
                         </div>
                         
+                        {# Botones de acción #}
                         <div class="d-flex justify-content-between mt-4">
                             <a href="{% if form.instance.pk %}{% url 'detalle_oportunidad' form.instance.pk %}{% else %}{% url 'lista_oportunidades' %}{% endif %}" 
                                class="btn btn-secondary">
@@ -167,6 +173,7 @@
     </div>
 </div>
 
+{# Estilos CSS personalizados #}
 <style>
     /* Estilos generales para los campos */
     .form-control, .form-select {
@@ -198,9 +205,9 @@
     }
 </style>
 
-<!-- Script para validación del lado del cliente -->
+{# Script de validación del lado del cliente #}
 <script>
-// Ejemplo de validación de formulario del lado del cliente
+// Validación de formulario del lado del cliente
 (function() {
     'use strict';
     window.addEventListener('load', function() {

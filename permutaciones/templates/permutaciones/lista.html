@@ -1,26 +1,38 @@
-<!-- permutaciones/lista.html -->
+<!-- Extiende la plantilla base de permutaciones -->
 {% extends "permutaciones/base_permutaciones.html" %}
 
+<!-- Bloque de contenido específico para esta página -->
 {% block permutaciones_content %}
+<!-- Tarjeta principal -->
 <div class="card">
+    <!-- Encabezado con título y botones -->
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Intercambiar Mis Turnos</h5>
     </div>
+    
+    <!-- Cuerpo de la tarjeta -->
     <div class="card-body">
+        <!-- Pestañas de navegación -->
         <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <!-- Pestaña de solicitudes recibidas -->
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="recibidas-tab" data-bs-toggle="tab" data-bs-target="#recibidas" type="button" role="tab" aria-controls="recibidas" aria-selected="true">
                     Recibidas
+                    <!-- Badge con contador de solicitudes pendientes -->
                     {% if solicitudes_recibidas.count > 0 %}
                         <span class="badge bg-danger">{{ solicitudes_recibidas.count }}</span>
                     {% endif %}
                 </button>
             </li>
+            
+            <!-- Pestaña de solicitudes enviadas -->
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="enviadas-tab" data-bs-toggle="tab" data-bs-target="#enviadas" type="button" role="tab" aria-controls="enviadas" aria-selected="false">
                     Enviadas
                 </button>
             </li>
+            
+            <!-- Pestaña de mis inscripciones -->
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="mis-inscripciones-tab" data-bs-toggle="tab" data-bs-target="#mis-inscripciones" type="button" role="tab" aria-controls="mis-inscripciones" aria-selected="false">
                     Mis Inscripciones
@@ -28,6 +40,7 @@
             </li>
         </ul>
         
+        <!-- Contenido de las pestañas -->
         <div class="tab-content mt-3" id="myTabContent">
             <!-- Pestaña de Solicitudes Recibidas -->
             <div class="tab-pane fade show active" id="recibidas" role="tabpanel" aria-labelledby="recibidas-tab">
@@ -57,7 +70,7 @@
                     </div>
                 {% else %}
                     <div class="alert alert-info">
-                        No tienes solicitudes de permutación recibidas.
+                        No tienes solicitudes de intercambio de turnos recibidas.
                     </div>
                 {% endif %}
             </div>
@@ -102,6 +115,7 @@
             <!-- Pestaña de Mis Inscripciones -->
             <div class="tab-pane fade" id="mis-inscripciones" role="tabpanel" aria-labelledby="mis-inscripciones-tab">
                 {% if oportunidad_actual %}
+                    <!-- Vista detallada de una oportunidad específica -->
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5>Intercambiando turno: {{ oportunidad_actual.titulo }}</h5>
@@ -109,25 +123,88 @@
                         <div class="card-body">
                             <h6>Oportunidades disponibles para intercambiar:</h6>
                             {% if oportunidades_permutables %}
-                                <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
-                                    {% for oportunidad in oportunidades_permutables %}
+                                <div class="row row-cols-1 g-4 mt-2">
+                                    {% for op in oportunidades_permutables %}
                                         <div class="col">
                                             <div class="card h-100">
                                                 <div class="card-body">
-                                                    <h5 class="card-title">{{ oportunidad.titulo }}</h5>
+                                                    <h5 class="card-title">
+                                                        {{ op.oportunidad.titulo }}
+                                                        <span class="badge bg-primary float-end">
+                                                            {{ op.usuarios_disponibles|length }} usuario{{ op.usuarios_disponibles|length|pluralize }} disponible{{ op.usuarios_disponibles|length|pluralize }}
+                                                        </span>
+                                                    </h5>
                                                     <p class="card-text">
                                                         <small class="text-muted">
-                                                            {{ oportunidad.fecha_inicio|date:"d M Y" }} - {{ oportunidad.fecha_fin|date:"d M Y" }}
+                                                            <i class="fas fa-calendar-alt me-1"></i>
+                                                            {{ op.oportunidad.fecha_inicio|date:"d M Y" }} - {{ op.oportunidad.fecha_fin|date:"d M Y" }}
                                                         </small>
                                                     </p>
-                                                    <p class="card-text">{{ oportunidad.descripcion|truncatechars:100 }}</p>
-                                                    <form method="post" action="{% url 'permutaciones:crear' oportunidad_actual.id %}" class="mt-2">
-                                                        {% csrf_token %}
-                                                        <input type="hidden" name="oportunidad_destino" value="{{ oportunidad.id }}">
-                                                        <button type="submit" class="btn btn-primary btn-sm">
-                                                            <i class="fas fa-exchange-alt"></i> Intercambiar Turno
-                                                        </button>
-                                                    </form>
+                                                    <p class="card-text">{{ op.oportunidad.descripcion|truncatechars:100 }}</p>
+                                                    
+                                                    <!-- Acordeón para mostrar usuarios disponibles -->
+                                                    <div class="accordion mb-3" id="accordionUsuarios{{ forloop.counter }}">
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                                                        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
+                                                                        aria-controls="collapse{{ forloop.counter }}">
+                                                                    <i class="fas fa-users me-2"></i>
+                                                                    Ver usuarios disponibles ({{ op.usuarios_disponibles|length }})
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" 
+                                                                 aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#accordionUsuarios{{ forloop.counter }}">
+                                                                <div class="accordion-body p-0">
+                                                                    <ul class="list-group list-group-flush">
+                                                                        {% for usuario in op.usuarios_disponibles %}
+                                                                            <li class="list-group-item">
+                                                                                <div class="d-flex justify-content-between align-items-start">
+                                                                                    <div class="d-flex align-items-start">
+                                                                                        <div class="me-3">
+                                                                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                                                                <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <div class="fw-bold">{{ usuario.nombre_completo }}</div>
+                                                                                            <div class="text-muted small">
+                                                                                                <i class="fas fa-envelope me-1"></i> {{ usuario.email }}
+                                                                                            </div>
+                                                                                            {% if usuario.telefono and usuario.telefono != 'No disponible' %}
+                                                                                                <div class="small">
+                                                                                                    <i class="fas fa-phone me-1"></i> {{ usuario.telefono }}
+                                                                                                </div>
+                                                                                            {% endif %}
+                                                                                            <div class="small text-muted mt-1">
+                                                                                                <i class="far fa-calendar-alt me-1"></i> Inscrito el {{ usuario.fecha_inscripcion|date:"d/m/Y" }}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="ms-3">
+                                                                                        {% if op.tiene_solicitud_pendiente %}
+                                                                                            <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                                                                <i class="fas fa-exchange-alt me-1"></i> Solicitud Enviada
+                                                                                            </button>
+                                                                                        {% else %}
+                                                                                            <form method="post" action="{% url 'permutaciones:crear' oportunidad_actual.id %}" class="d-inline">
+                                                                                                {% csrf_token %}
+                                                                                                <input type="hidden" name="oportunidad_destino" value="{{ op.oportunidad.id }}">
+                                                                                                <input type="hidden" name="usuario_destino" value="{{ usuario.id }}">
+                                                                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                                                                    <i class="fas fa-exchange-alt me-1"></i> Solicitar Intercambio
+                                                                                                </button>
+                                                                                            </form>
+                                                                                        {% endif %}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -146,6 +223,7 @@
                         </div>
                     </div>
                 {% elif mis_inscripciones %}
+                    <!-- Vista de lista de inscripciones -->
                     <div class="row row-cols-1 row-cols-md-2 g-4">
                         {% for inscripcion in mis_inscripciones %}
                             <div class="col">

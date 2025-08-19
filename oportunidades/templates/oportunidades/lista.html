@@ -1,46 +1,99 @@
+{# Extiende la plantilla base.html #}
 {% extends 'base.html' %}
 
+{% block extra_css %}
+<style>
+/* Estilos para las tarjetas de oportunidades */
+.card {
+    transition: transform 0.2s ease-in-out;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{# Define el bloque de contenido principal #}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Oportunidades de Voluntariado</h1>
-    {% if user.is_superuser %}
+    {# Botón para crear nueva oportunidad (visible para superusuarios y administradores) #}
+    {% if user.is_superuser or user.acceso_admin %}
     <a href="{% url 'crear_oportunidad' %}" class="btn btn-success">Nueva oportunidad</a>
     {% endif %}
 </div>
+
+{# Contenedor principal de tarjetas #}
 <div class="row row-cols-1 row-cols-md-2 g-4">
+    {# Bucle a través de las oportunidades #}
     {% for o in oportunidades %}
     <div class="col">
         <div class="card shadow-sm h-100">
+            {# Muestra imágenes alternadas basadas en el índice del bucle #}
             {% if forloop.counter0|divisibleby:6 %}
-                <img src="https://bristolenos.com/wp-content/uploads/2016/02/depositphotos_10961975_s.jpg?w=1300" class="card-img-top" alt="Voluntariado 1" style="height: 200px; object-fit: cover;">
+                <img src="https://bristolenos.com/wp-content/uploads/2016/02/depositphotos_10961975_s.jpg?w=1300" class="card-img-top" alt="Imagen de voluntariado" style="height: 200px; object-fit: cover;">
             {% elif forloop.counter0|divisibleby:5 %}
-                <img src="https://r9.ieee.org/ecuador-yp/wp-content/uploads/sites/18/2018/12/10636219_739910989412898_6007121839736226423_n.jpg" class="card-img-top" alt="Voluntariado 2" style="height: 200px; object-fit: cover;">
+                <img src="https://r9.ieee.org/ecuador-yp/wp-content/uploads/sites/18/2018/12/10636219_739910989412898_6007121839736226423_n.jpg" class="card-img-top" alt="Imagen de voluntariado" style="height: 200px; object-fit: cover;">
             {% elif forloop.counter0|divisibleby:4 %}
-                <img src="https://www.esneca.lat/wp-content/uploads/voluntariado-internacional-1.jpg" class="card-img-top" alt="Voluntariado 3" style="height: 200px; object-fit: cover;">
+                <img src="https://www.esneca.lat/wp-content/uploads/voluntariado-internacional-1.jpg" class="card-img-top" alt="Imagen de voluntariado" style="height: 200px; object-fit: cover;">
             {% elif forloop.counter0|divisibleby:3 %}
-                <img src="https://ceconsulting.es/wp-content/uploads/2022/09/voluntariado-requisitos-legales.jpg" class="card-img-top" alt="Voluntariado 4" style="height: 200px; object-fit: cover;">
+                <img src="https://ceconsulting.es/wp-content/uploads/2022/09/voluntariado-requisitos-legales.jpg" class="card-img-top" alt="Imagen de voluntariado" style="height: 200px; object-fit: cover;">
             {% elif forloop.counter0|divisibleby:2 %}
-                <img src="https://educowebmedia.blob.core.windows.net/educowebmedia/educospain/media/images/blog/manos-voluntariado.jpg" class="card-img-top" alt="Voluntariado 5" style="height: 200px; object-fit: cover;">
+                <img src="https://educowebmedia.blob.core.windows.net/educowebmedia/educospain/media/images/blog/manos-voluntariado.jpg" class="card-img-top" alt="Imagen de voluntariado" style="height: 200px; object-fit: cover;">
             {% else %}
-                <img src="https://fundaciontelefonica.com.ec/wp-content/uploads/2023/03/voluntariado-fundacion-telefonica-1.jpg" class="card-img-top" alt="Voluntariado 6" style="height: 200px; object-fit: cover;">
+                <img src="https://fundaciontelefonica.com.ec/wp-content/uploads/2023/03/voluntariado-fundacion-telefonica-1.jpg" class="card-img-top" alt="Imagen de voluntariado" style="height: 200px; object-fit: cover;">
             {% endif %}
+            
+            {# Cuerpo de la tarjeta #}
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title">{{ o.titulo }}</h5>
+                {# Descripción truncada a 100 caracteres #}
                 <p class="card-text flex-grow-1">{{ o.descripcion|truncatechars:100 }}</p>
                 <p class="mb-1"><strong>Organización:</strong> {{ o.organizacion }}</p>
+                
+                {# Acciones de la tarjeta #}
                 <div class="mt-auto">
+                    {# Botón para ver detalles #}
                     <a href="{% url 'detalle_oportunidad' o.pk %}" class="btn btn-primary btn-sm">Ver</a>
+                    
+                    {# Acciones para usuarios autenticados normales #}
                     {% if user.is_authenticated and not user.is_superuser %}
                         {% if o.id in inscripciones_usuario %}
+                            {# Si ya está inscrito #}
                             <span class="badge bg-secondary">Ya inscrito</span>
-                            <a href="{% url 'permutaciones:lista' %}?oportunidad_id={{ o.id }}" class="btn btn-info btn-sm mt-1">
-                                <i class="fas fa-exchange-alt"></i> Intercambiar
-                            </a>
+                            {% if request.resolver_match.url_name == 'mis_inscripciones' %}
+                                <a href="{% url 'permutaciones:lista' %}?oportunidad_id={{ o.id }}" class="btn btn-info btn-sm mt-1">
+                                    <i class="fas fa-exchange-alt"></i> Intercambiar
+                                </a>
+                            {% endif %}
                         {% else %}
+                            {# Si no está inscrito #}
                             <a href="{% url 'inscripciones:inscribirse' o.pk %}" class="btn btn-success btn-sm">Inscribirse</a>
                         {% endif %}
                     {% endif %}
-                    {% if user.is_superuser %}
+                    
+                    {# Acciones para superusuarios y administradores #}
+                    {% if user.is_superuser or user.acceso_admin %}
                     <a href="{% url 'editar_oportunidad' o.pk %}" class="btn btn-warning btn-sm">Editar</a>
                     <a href="{% url 'eliminar_oportunidad' o.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
                     {% endif %}
@@ -49,6 +102,7 @@
         </div>
     </div>
     {% empty %}
+    {# Mensaje cuando no hay oportunidades #}
     <div class="col">
         <div class="alert alert-info">No hay oportunidades registradas.</div>
     </div>

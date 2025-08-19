@@ -3,3 +3,11 @@ Django==4.2.23
 psycopg2-binary==2.9.10
 sqlparse==0.5.3
 typing_extensions==4.14.1
+# Archivo de requisitos del proyecto RedSolidaria
+
+# Este archivo lista todas las dependencias de Python necesarias para ejecutar el proyecto.
+# Para instalar todas las dependencias, ejecuta:
+# pip install -r requirements.txt
+#
+# Cuando agregues nuevas dependencias, actualiza este archivo con:
+# pip freeze > requirements.txt

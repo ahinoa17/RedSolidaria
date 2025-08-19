@@ -1,70 +1,127 @@
+{# Plantilla base de RedSolidaria que sirve como estructura principal para todas las páginas #}
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>RedSolidaria</title>
+    <meta charset="UTF-8">
+    <title>{% block title %}RedSolidaria{% endblock %}</title>
+    {# Metaetiqueta para hacer el diseño responsivo #}
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS CDN -->
+    
+    {# Hojas de estilo CSS #}
+    <!-- Bootstrap 5.3.2 desde CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome para iconos -->
+    <!-- Font Awesome 6.0.0 para iconos -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    {# Estilos personalizados #}
     <style>
+        /* Estilos para los enlaces de la barra de navegación */
         .navbar-nav .nav-link,
         .navbar-nav .nav-link i {
-          color: #f7f3f3 !important;
-          opacity: 1 !important;
-          font-weight: 500;
-          font-size: 1.15rem;
-          transition: color 0.2s;
+          color: #f7f3f3 !important;  /* Color de texto blanco */
+          opacity: 1 !important;      /* Opacidad completa */
+          font-weight: 500;           /* Peso de la fuente */
+          font-size: 1.15rem;         /* Tamaño de fuente */
+          transition: color 0.2s;      /* Transición suave para el efecto hover */
         }
+        
+        /* Efecto hover para los enlaces de navegación */
         .navbar-nav .nav-link:hover,
         .navbar-nav .nav-link:focus {
-          color: #ffd700 !important; /* Amarillo dorado al pasar el mouse */
+          color: #ffd700 !important;  /* Color dorado al pasar el cursor */
         }
+        
+        /* Estilo para botones con borde claro */
         .navbar-nav .btn-outline-light {
-          font-weight: 600;
+          font-weight: 600;  /* Texto en negrita */
         }
+        
+        /* Estilo base del cuerpo del documento */
         body {
-            min-height: 100vh;
-            background: linear-gradient(120deg, #b0cde9 0%, #e0eafc 100%);
-            background-attachment: fixed;
+            min-height: 100vh;  /* Altura mínima de la ventana */
+            background: linear-gradient(120deg, #b0cde9 0%, #e0eafc 100%);  /* Degradado de fondo */
+            background-attachment: fixed;  /* Fondo fijo al hacer scroll */
         }
-        /* Estilo para el menú de usuario autenticado */
+        
+        /* Estilo para el mensaje de bienvenida del usuario */
         .user-welcome {
-            color: #fff !important;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
+            color: #fff !important;      /* Texto blanco */
+            font-weight: 500;           /* Peso de la fuente */
+            padding: 0.5rem 1rem;       /* Espaciado interno */
+            display: flex;              /* Flexbox para alinear ícono y texto */
+            align-items: center;        /* Centrado vertical */
         }
+        
+        /* Estilo para el ícono del mensaje de bienvenida */
         .user-welcome i {
-            margin-right: 8px;
+            margin-right: 8px;  /* Margen derecho para separar el ícono del texto */
+        }
+
+        /* Estilo para las tablas */
+        .table th {
+            background-color: #f8f9fa;  /* Fondo claro para los encabezados */
+            border-top: none;           /* Elimina el borde superior */
+        }
+
+        /* Estilo para los botones de acción */
+        .btn-action {
+            padding: 0.25rem 0.5rem;    /* Espaciado interno reducido */
+            font-size: 0.875rem;        /* Tamaño de fuente más pequeño */
         }
     </style>
+    
+    {# Bloque para estilos adicionales en plantillas hijas #}
+    {% block extra_css %}{% endblock %}
 </head>
+
 <body class="bg-light">
+    {# Barra de navegación principal #}
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
         <div class="container-fluid">
+            {# Logo y nombre de la aplicación #}
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
                 <i class="fas fa-hands-helping me-2 fs-3"></i>
                 <span class="fw-bold" style="letter-spacing:1px;">RedSolidaria</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            
+            {# Botón para menú en dispositivos móviles #}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
+            {# Menú de navegación principal #}
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-center gap-2">
                     {% if user.is_authenticated %}
-                        <!-- Menú para usuarios autenticados -->
+                        {# Menú para usuarios autenticados #}
+                        
+                        <!-- Enlace a Oportunidades -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'lista_oportunidades' %}"><i class="fas fa-lightbulb"></i> Oportunidades</a>
+                            <a class="nav-link" href="{% url 'lista_oportunidades' %}">
+                                <i class="fas fa-lightbulb"></i> Oportunidades
+                            </a>
                         </li>
+                        
+                        <!-- Enlace a Mis Inscripciones (no visible para superusuarios) -->
+                        {% if not user.is_superuser %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'inscripciones:mis_inscripciones' %}"><i class="fas fa-user-check"></i> Mis Inscripciones</a>
+                            <a class="nav-link" href="{% url 'inscripciones:mis_inscripciones' %}">
+                                <i class="fas fa-user-check"></i> Mis Inscripciones
+                            </a>
                         </li>
+                        {% endif %}
+                        
+                        <!-- Enlace a Organizaciones -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'lista_organizaciones' %}"><i class="fas fa-building"></i> Organizaciones</a>
+                            <a class="nav-link" href="{% url 'lista_organizaciones' %}">
+                                <i class="fas fa-building"></i> Organizaciones
+                            </a>
                         </li>
-                        {% if user.is_superuser %}
+                        
+                        {# Menú adicional para administradores #}
+                        {% if user.is_superuser or user.acceso_admin %}
+                        <!-- Enlace a Gestión de Inscripciones (solo admin) -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'inscripciones:gestion_inscripciones' %}">
                                 <i class="fas fa-tasks me-1"></i> Gestionar Inscripciones
@@ -78,33 +135,63 @@
                                 {% endif %}
                             </a>
                         </li>
+                        
+                        <!-- Enlace a Gestión de Usuarios (solo superusuarios) -->
+                        {% if user.is_superuser %}
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/"><i class="fas fa-shield-alt"></i> Admin</a>
+                            <a class="nav-link" href="{% url 'listar_usuarios' %}">
+                                <i class="fas fa-users-cog me-1"></i> Gestionar Usuarios
+                            </a>
                         </li>
                         {% endif %}
+                        
+                        <!-- Enlace al panel de administración -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}">
+                                <i class="fas fa-cogs me-1"></i> Admin
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <!-- Mensaje de bienvenida del usuario -->
                         <li class="nav-item">
                             <span class="user-welcome">
-                                <i class="fas fa-user-circle"></i> {{ user.username }}
+                                <i class="fas fa-user-circle"></i> {{ user.get_full_name|default:user.username }}
                             </span>
                         </li>
+                        
+                        <!-- Botón de Cerrar Sesión -->
                         <li class="nav-item">
                             <a class="btn btn-outline-light ms-2" href="{% url 'logout' %}">
                                 <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
                             </a>
                         </li>
+                        
                     {% else %}
-                        <!-- Menú para usuarios no autenticados -->
+                        {# Menú para usuarios no autenticados #}
+                        
+                        <!-- Enlace a Oportunidades -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'lista_oportunidades' %}"><i class="fas fa-lightbulb"></i> Oportunidades</a>
+                            <a class="nav-link" href="{% url 'lista_oportunidades' %}">
+                                <i class="fas fa-lightbulb"></i> Oportunidades
+                            </a>
                         </li>
+                        
+                        <!-- Enlace a Organizaciones -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'lista_organizaciones' %}"><i class="fas fa-building"></i> Organizaciones</a>
+                            <a class="nav-link" href="{% url 'lista_organizaciones' %}">
+                                <i class="fas fa-building"></i> Organizaciones
+                            </a>
                         </li>
+                        
+                        <!-- Botón de Iniciar Sesión -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">
                                 <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
                             </a>
                         </li>
+                        
+                        <!-- Botón de Registro -->
                         <li class="nav-item">
                             <a class="btn btn-outline-light" href="{% url 'registro_voluntario' %}">
                                 <i class="fas fa-user-plus me-1"></i> Registrarse
@@ -116,7 +203,9 @@
         </div>
     </nav>
 
+    {# Contenedor principal del contenido #}
     <div class="container mt-4">
+        {# Sistema de mensajes flash #}
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -125,17 +214,44 @@
                 </div>
             {% endfor %}
         {% endif %}
+        
+        {# Bloque para el contenido principal de las páginas hijas #}
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Scripts necesarios -->
+    {# Scripts JavaScript #}
+    <!-- Bootstrap Bundle con Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // Activar tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+        // Inicialización de tooltips de Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Añadir clases de formulario a los elementos dinámicos
+            const formInputs = document.querySelectorAll('input:not([type=checkbox]):not([type=radio]), select, textarea');
+            formInputs.forEach(input => {
+                input.classList.add('form-control');
+            });
+
+            // Añadir clases a checkboxes y radios
+            const checkboxes = document.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.classList.add('form-check-input');
+                const formCheck = checkbox.closest('.form-check') || checkbox.closest('.form-switch');
+                if (formCheck) {
+                    const label = formCheck.querySelector('label');
+                    if (label) label.classList.add('form-check-label');
+                }
+            });
         });
     </script>
+    
+    {# Bloque para scripts adicionales en plantillas hijas #}
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

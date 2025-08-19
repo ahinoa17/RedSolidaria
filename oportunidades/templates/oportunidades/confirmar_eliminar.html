@@ -1,12 +1,27 @@
+{# Extiende la plantilla base.html #}
 {% extends "base.html" %}
+
+{# Define el bloque de contenido principal #}
 {% block content %}
 <div class="card shadow-sm mx-auto" style="max-width: 400px;">
     <div class="card-body">
+        {# Título con el nombre de la oportunidad a eliminar #}
         <h2 class="card-title">¿Eliminar oportunidad "{{ oportunidad.titulo }}"?</h2>
+        
+        {# Formulario para confirmar la eliminación #}
         <form method="post">
+            {# Token CSRF para protección contra ataques #}
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Sí, eliminar</button>
-            <a href="{% url 'detalle_oportunidad' oportunidad.pk %}" class="btn btn-secondary">Cancelar</a>
+            
+            {# Botón de confirmación de eliminación #}
+            <button type="submit" class="btn btn-danger">
+                Sí, eliminar
+            </button>
+            
+            {# Enlace para cancelar y volver al detalle de la oportunidad #}
+            <a href="{% url 'detalle_oportunidad' oportunidad.pk %}" class="btn btn-secondary">
+                Cancelar
+            </a>
         </form>
     </div>
 </div>

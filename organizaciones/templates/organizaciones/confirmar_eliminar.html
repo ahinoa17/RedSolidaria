@@ -1,12 +1,28 @@
+<!-- Hereda de la plantilla base.html -->
 {% extends "base.html" %}
+
+<!-- Define el bloque de contenido principal -->
 {% block content %}
+<!-- Tarjeta con sombra y ancho máximo -->
 <div class="card shadow-sm mx-auto" style="max-width: 400px;">
     <div class="card-body">
+        <!-- Título con el nombre de la organización a eliminar -->
         <h2 class="card-title">¿Eliminar organización "{{ organizacion.nombre }}"?</h2>
+        
+        <!-- Formulario para confirmar la eliminación -->
         <form method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Sí, eliminar</button>
-            <a href="{% url 'detalle_organizacion' organizacion.pk %}" class="btn btn-secondary">Cancelar</a>
+            {% csrf_token %}  <!-- Token de seguridad CSRF -->
+            
+            <!-- Botón de confirmación -->
+            <button type="submit" class="btn btn-danger">
+                Sí, eliminar
+            </button>
+            
+            <!-- Enlace para cancelar y volver al detalle -->
+            <a href="{% url 'detalle_organizacion' organizacion.pk %}" 
+               class="btn btn-secondary">
+                Cancelar
+            </a>
         </form>
     </div>
 </div>

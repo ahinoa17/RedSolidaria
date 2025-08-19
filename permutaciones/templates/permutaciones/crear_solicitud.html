@@ -1,39 +1,64 @@
-<!-- permutaciones/crear_solicitud.html -->
+<!-- Extiende la plantilla base de permutaciones que ya incluye la estructura común -->
 {% extends "permutaciones/base_permutaciones.html" %}
 
+<!-- Define el bloque de contenido específico para esta página -->
 {% block permutaciones_content %}
+<!-- Tarjeta principal del formulario -->
 <div class="card">
+    <!-- Encabezado de la tarjeta -->
     <div class="card-header">
         <h5 class="mb-0">Solicitar Permutación</h5>
     </div>
+    
+    <!-- Cuerpo de la tarjeta -->
     <div class="card-body">
+        <!-- Fila para mostrar la información en dos columnas -->
         <div class="row mb-4">
+            <!-- Columna izquierda: Oportunidad Actual -->
             <div class="col-md-6">
+                <!-- Tarjeta para la oportunidad actual -->
                 <div class="card h-100">
+                    <!-- Encabezado de la tarjeta con fondo claro -->
                     <div class="card-header bg-light">
                         <h6 class="mb-0">Oportunidad Actual</h6>
                     </div>
+                    <!-- Cuerpo de la tarjeta con los detalles -->
                     <div class="card-body">
+                        <!-- Título de la oportunidad -->
                         <h5>{{ oportunidad_origen.titulo }}</h5>
+                        <!-- Descripción truncada a 30 palabras -->
                         <p>{{ oportunidad_origen.descripcion|truncatewords:30 }}</p>
+                        <!-- Ubicación de la oportunidad -->
                         <p class="mb-1"><strong>Ubicación:</strong> {{ oportunidad_origen.ubicacion }}</p>
+                        <!-- Rango de fechas formateado -->
                         <p class="mb-1"><strong>Fechas:</strong> {{ oportunidad_origen.fecha_inicio|date:"d/m/Y" }} - {{ oportunidad_origen.fecha_fin|date:"d/m/Y" }}</p>
+                        <!-- Horario con valor por defecto si no está especificado -->
                         <p class="mb-0"><strong>Horario:</strong> {{ oportunidad_origen.horario|default:"No especificado" }}</p>
                     </div>
                 </div>
             </div>
+            
+            <!-- Columna derecha: Formulario de selección de destino -->
             <div class="col-md-6">
+                <!-- Tarjeta para el formulario -->
                 <div class="card h-100">
+                    <!-- Encabezado de la tarjeta con fondo claro -->
                     <div class="card-header bg-light">
                         <h6 class="mb-0">Seleccionar Oportunidad de Destino</h6>
                     </div>
+                    <!-- Cuerpo del formulario -->
                     <div class="card-body">
+                        <!-- Formulario para enviar la solicitud -->
                         <form method="post">
+                            <!-- Token CSRF para protección contra ataques -->
                             {% csrf_token %}
+                            
+                            <!-- Campo de selección de oportunidad destino -->
                             <div class="mb-3">
                                 <label for="oportunidad_destino" class="form-label">Oportunidad</label>
                                 <select class="form-select" id="oportunidad_destino" name="oportunidad_destino" required>
                                     <option value="">Selecciona una oportunidad</option>
+                                    <!-- Bucle para mostrar las opciones de destino disponibles -->
                                     {% for oportunidad in oportunidades_destino %}
                                         <option value="{{ oportunidad.id }}">
                                             {{ oportunidad.titenda }} - {{ oportunidad.ubicacion }}
@@ -42,12 +67,19 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            
+                            <!-- Campo de mensaje opcional -->
                             <div class="mb-3">
                                 <label for="mensaje" class="form-label">Mensaje (opcional)</label>
-                                <textarea class="form-control" id="mensaje" name="mensaje" rows="3" placeholder="Explica por qué deseas realizar esta permutación"></textarea>
+                                <textarea class="form-control" id="mensaje" name="mensaje" rows="3" 
+                                          placeholder="Explica por qué deseas realizar esta permutación"></textarea>
                             </div>
+                            
+                            <!-- Botones de acción -->
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <!-- Botón para cancelar y volver a la lista -->
                                 <a href="{% url 'permutaciones:lista_permutaciones' %}" class="btn btn-secondary">Cancelar</a>
+                                <!-- Botón para enviar el formulario -->
                                 <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
                             </div>
                         </form>

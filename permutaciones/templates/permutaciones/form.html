@@ -1,13 +1,29 @@
+<!-- Extiende la plantilla base del proyecto -->
 {% extends "base.html" %}
+
+<!-- Bloque de contenido principal -->
 {% block content %}
+<!-- Tarjeta con sombra y ancho máximo de 500px, centrada horizontalmente -->
 <div class="card shadow-sm mx-auto" style="max-width: 500px;">
+    <!-- Cuerpo de la tarjeta -->
     <div class="card-body">
+        <!-- Título dinámico que cambia entre "Editar" y "Crear" según el contexto -->
         <h2 class="card-title mb-4">{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Permutación</h2>
+        
+        <!-- Formulario que envía datos por POST -->
         <form method="post">
+            <!-- Token CSRF para protección contra ataques -->
             {% csrf_token %}
+            
+            <!-- Renderiza automáticamente los campos del formulario en párrafos -->
             {{ form.as_p }}
+            
+            <!-- Contenedor para los botones de acción -->
             <div class="d-flex justify-content-between mt-3">
+                <!-- Botón para enviar el formulario -->
                 <button type="submit" class="btn btn-primary">Guardar</button>
+                
+                <!-- Enlace para cancelar y volver al listado -->
                 <a href="{% url 'lista_permutaciones' %}" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>

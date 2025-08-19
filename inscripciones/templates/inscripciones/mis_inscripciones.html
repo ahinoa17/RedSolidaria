@@ -1,40 +1,72 @@
+<!-- Extiendo la plantilla base para mantener la consistencia del diseño -->
 {% extends 'base.html' %}
 {% load static %}
 
+<!-- Inicio del bloque de contenido principal -->
 {% block content %}
 <div class="container py-5">
+    <!-- Título principal de la página -->
     <h1 class="mb-4">Mis Inscripciones</h1>
     
+    <!-- Verifico si hay inscripciones para mostrar -->
     {% if inscripciones %}
         <div class="row">
+            <!-- Itero sobre cada inscripción -->
             {% for inscripcion in inscripciones %}
             <div class="col-md-6 mb-4">
+                <!-- Tarjeta para cada inscripción con sombra suave -->
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
+                        <!-- Título de la oportunidad -->
                         <h5 class="card-title">{{ inscripcion.oportunidad.titulo }}</h5>
+                        
+                        <!-- Subtítulo con el nombre de la organización -->
                         <h6 class="card-subtitle mb-2 text-muted">
                             {{ inscripcion.oportunidad.organizacion.nombre }}
                         </h6>
+                        
+                        <!-- Fechas de la oportunidad -->
                         <p class="card-text">
                             <i class="fas fa-calendar-alt me-2"></i>
                             {{ inscripcion.oportunidad.fecha_inicio|date:"d M Y" }} - 
                             {{ inscripcion.oportunidad.fecha_fin|date:"d M Y" }}
                         </p>
+                        
+                        <!-- Estado de la inscripción con badge de color -->
                         <p class="card-text">
-                            <span class="badge bg-{% if inscripcion.estado == 'aprobado' %}success{% elif inscripcion.estado == 'rechazado' %}danger{% else %}warning{% endif %}">
+                            <span class="badge bg-{% if inscripcion.estado == 'aceptada' %}success{% elif inscripcion.estado == 'rechazada' %}danger{% else %}warning{% endif %}">
                                 {{ inscripcion.get_estado_display }}
                             </span>
                         </p>
+                        
+                        <!-- Descripción truncada de la oportunidad -->
                         <p class="card-text">{{ inscripcion.oportunidad.descripcion|truncatewords:30 }}</p>
                     </div>
+                    
+                    <!-- Pie de tarjeta con botones de acción -->
                     <div class="card-footer bg-transparent">
-                        <a href="{% url 'detalle_oportunidad' inscripcion.oportunidad.id %}" class="btn btn-outline-primary btn-sm">
+                        <!-- Botón para ver detalles de la oportunidad -->
+                        <a href="{% url 'detalle_oportunidad' inscripcion.oportunidad.id %}" 
+                           class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-eye me-1"></i> Ver Detalles
                         </a>
-                        <form method="post" action="{% url 'inscripciones:eliminar_inscripcion' inscripcion.id %}" class="d-inline">
+                        
+                        <!-- Botón para intercambiar turno (solo para inscripciones aceptadas) -->
+                        {% if inscripcion.estado == 'aceptada' %}
+                        <a href="{% url 'permutaciones:lista' %}?oportunidad_id={{ inscripcion.oportunidad.id }}" 
+                           class="btn btn-info btn-sm">
+                            <i class="fas fa-exchange-alt me-1"></i> Intercambiar
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Formulario para cancelar la inscripción -->
+                        <form method="post" 
+                              action="{% url 'inscripciones:eliminar_inscripcion' inscripcion.id %}" 
+                              class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger btn-sm" 
-                                onclick="return confirm('¿Estás seguro de que deseas cancelar esta inscripción?');">
+                            <button type="submit" 
+                                    class="btn btn-outline-danger btn-sm" 
+                                    onclick="return confirm('¿Estás seguro de que deseas cancelar esta inscripción?');">
                                 <i class="fas fa-trash-alt me-1"></i> Cancelar
                             </button>
                         </form>
@@ -44,6 +76,7 @@
             {% endfor %}
         </div>
     {% else %}
+        <!-- Mensaje que se muestra cuando no hay inscripciones -->
         <div class="alert alert-info" role="alert">
             <i class="fas fa-info-circle me-2"></i>
             No tienes inscripciones activas. 

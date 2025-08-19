@@ -1,56 +1,79 @@
+{# Plantilla de la página de inicio de RedSolidaria #}
+{# Extiende la plantilla base.html #}
 {% extends "base.html" %}
+
+{# Carga las etiquetas estáticas #}
 {% load static %}
 
+{# Inicio del bloque de contenido principal #}
 {% block content %}
 <div class="container py-4">
-    <!-- Sección de bienvenida con mensaje personalizado -->
+    {# Sección de bienvenida con mensaje personalizado #}
     <div class="jumbotron text-center mb-5 bg-light p-5 rounded-3">
+        {# Título principal con el nombre de la plataforma #}
         <h1 class="display-4">¡Bienvenido a <span class="text-primary">RedSolidaria</span>!</h1>
         <p class="lead">Plataforma de gestión de voluntariado</p>
         <hr class="my-4">
+        
+        {# Saludo personalizado que muestra el nombre completo o el email del usuario #}
         <p class="h5">Hola, {{ user.get_full_name|default:user.email }}.</p>
+        
+        {# Contenedor de botones de acción principales #}
         <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+            {# Botón para ver oportunidades de voluntariado #}
             <a class="btn btn-primary btn-lg" href="{% url 'lista_oportunidades' %}" role="button">
                 <i class="bi bi-lightbulb me-2"></i>Ver Oportunidades
             </a>
-            {% if user.tipo_usuario == 'voluntario' %}
+            
+            {# Botón de mis inscripciones (solo visible para voluntarios que no sean superusuarios) #}
+            {% if user.tipo_usuario == 'voluntario' and not user.is_superuser %}
             <a class="btn btn-success btn-lg" href="{% url 'inscripciones:mis_inscripciones' %}" role="button">
                 <i class="bi bi-person-check me-2"></i>Mis Inscripciones
             </a>
             {% endif %}
+            
+            {# Botón para ver organizaciones #}
             <a class="btn btn-outline-info btn-lg" href="{% url 'lista_organizaciones' %}" role="button">
                 <i class="bi bi-building me-2"></i>Organizaciones
             </a>
         </div>
     </div>
 
-    <!-- Sección de características -->
+    {# Sección de características principales #}
     <div class="row text-center mb-5">
+        {# Tarjeta 1: Participa en actividades #}
         <div class="col-md-4 mb-4">
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
                     <img src="https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80"
-                         class="img-fluid rounded mb-3" alt="Participa en actividades" style="height: 200px; width: 100%; object-fit: cover;">
+                         class="img-fluid rounded mb-3" alt="Participa en actividades" 
+                         style="height: 200px; width: 100%; object-fit: cover;">
                     <h5 class="fw-bold">Participa en actividades</h5>
                     <p class="text-muted">Inscríbete en oportunidades de voluntariado y vive experiencias únicas ayudando a los demás.</p>
                 </div>
             </div>
         </div>
+        
+        {# Tarjeta 2: Conecta con organizaciones #}
         <div class="col-md-4 mb-4">
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
                     <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=400&q=80"
-                         class="img-fluid rounded mb-3" alt="Trabajo en equipo" style="height: 200px; width: 100%; object-fit: cover;">
+                         class="img-fluid rounded mb-3" alt="Trabajo en equipo" 
+                         style="height: 200px; width: 100%; object-fit: cover;">
                     <h5 class="fw-bold">Conecta con organizaciones</h5>
                     <p class="text-muted">Colabora con distintas organizaciones y haz crecer tu red solidaria.</p>
                 </div>
             </div>
         </div>
+        
+        {# Tarjeta 3: Genera impacto positivo #}
         <div class="col-md-4 mb-4">
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
                     <img src="https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=400&q=80"
-                         class="img-fluid rounded mb-3" alt="Impacto positivo" style="height: 200px; width: 100%; object-fit: cover;">
+                         class="img-fluid rounded mb-3" alt="Impacto positivo" 
+                         style="height: 200px; width: 100%; object-fit: cover;">
                     <h5 class="fw-bold">Genera impacto positivo</h5>
                     <p class="text-muted">Tus acciones pueden transformar vidas y comunidades enteras. ¡Súmate!</p>
                 </div>
@@ -59,18 +82,23 @@
     </div>
 </div>
 
-<!-- Incluir íconos de Bootstrap Icons -->
+{# Inclusión de la hoja de estilos de Bootstrap Icons #}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-<!-- Estilos adicionales -->
+{# Estilos CSS personalizados #}
 <style>
+    /* Estilo para el jumbotron con gradiente */
     .jumbotron {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     }
+    
+    /* Estilo para botones grandes */
     .btn-lg {
         padding: 0.75rem 1.5rem;
         font-size: 1.1rem;
     }
+    
+    /* Efecto de elevación al pasar el cursor sobre las tarjetas */
     .card {
         transition: transform 0.3s ease;
     }

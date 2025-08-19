@@ -1,34 +1,113 @@
+<!-- Aquí extiendo la plantilla base para mantener el diseño consistente en toda la aplicación -->
 {% extends 'base.html' %}
 
+<!-- Este bloque 'content' reemplazará el contenido de la plantilla base -->
 {% block content %}
+<!-- Contenedor principal con margen superior -->
 <div class="container mt-5">
+    <!-- Fila centrada horizontalmente -->
     <div class="row justify-content-center">
+        <!-- Columna que ocupa 8/12 del ancho en pantallas medianas/grandes -->
         <div class="col-md-8">
+            <!-- Tarjeta con sombra para mejor contraste visual -->
             <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Confirmar Inscripción</h4>
+                <!-- Encabezado de la tarjeta que cambia de color según disponibilidad -->
+                <div class="card-header {% if cupos_disponibles %}bg-primary{% else %}bg-danger{% endif %} text-white">
+                    <h4 class="mb-0">
+                        {% if cupos_disponibles %}
+                            <!-- Ícono de check para cuando hay cupos -->
+                            <i class="fas fa-check-circle me-2"></i>Confirmar Inscripción
+                        {% else %}
+                            <!-- Ícono de advertencia para cuando no hay cupos -->
+                            <i class="fas fa-exclamation-triangle me-2"></i>Cupos Agotados
+                        {% endif %}
+                    </h4>
                 </div>
+                
+                <!-- Cuerpo de la tarjeta -->
                 <div class="card-body">
-                    <h5 class="card-title">¿Deseas inscribirte en esta oportunidad?</h5>
+                    <!-- Muestro mensaje según disponibilidad de cupos -->
+                    {% if cupos_disponibles %}
+                        <h5 class="card-title">¿Deseas inscribirte en esta oportunidad?</h5>
+                    {% else %}
+                        <!-- Alerta de advertencia cuando no hay cupos -->
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Lo sentimos, no hay cupos disponibles para esta oportunidad en este momento.
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Tarjeta con los detalles de la oportunidad -->
                     <div class="card mb-4">
                         <div class="card-body">
-                            <h5 class="card-title">{{ oportunidad.titulo }}</h5>
+                            <!-- Título y badge de estado en una fila flexible -->
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title">{{ oportunidad.titulo }}</h5>
+                                <!-- Badge que muestra la disponibilidad -->
+                                <span class="badge {% if cupos_disponibles %}bg-success{% else %}bg-danger{% endif %} ms-2">
+                                    {% if cupos_disponibles %}
+                                        <i class="fas fa-users"></i> 
+                                        {{ oportunidad.cupos }} cupo{{ oportunidad.cupos|pluralize }} 
+                                        disponible{{ oportunidad.cupos|pluralize:'s' }}
+                                    {% else %}
+                                        <i class="fas fa-times-circle"></i> Sin cupos
+                                    {% endif %}
+                                </span>
+                            </div>
+                            
+                            <!-- Descripción truncada de la oportunidad -->
                             <p class="card-text">{{ oportunidad.descripcion|truncatewords:30 }}</p>
-                            <p class="mb-1"><strong>Organización:</strong> {{ oportunidad.organizacion }}</p>
-                            <p class="mb-1"><strong>Ubicación:</strong> {{ oportunidad.ubicacion }}</p>
-                            <p class="mb-0"><strong>Fechas:</strong> {{ oportunidad.fecha_inicio|date:"d/m/Y" }} - {{ oportunidad.fecha_fin|date:"d/m/Y" }}</p>
+                            
+                            <!-- Detalles organizados en dos columnas -->
+                            <div class="row">
+                                <!-- Columna izquierda: Organización y ubicación -->
+                                <div class="col-md-6">
+                                    <p class="mb-1">
+                                        <strong><i class="fas fa-building me-1"></i> Organización:</strong> 
+                                        {{ oportunidad.organizacion }}
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong><i class="fas fa-map-marker-alt me-1"></i> Ubicación:</strong> 
+                                        {{ oportunidad.ubicacion }}
+                                    </p>
+                                </div>
+                                
+                                <!-- Columna derecha: Fechas y horario -->
+                                <div class="col-md-6">
+                                    <p class="mb-1">
+                                        <strong><i class="far fa-calendar-alt me-1"></i> Fechas:</strong> 
+                                        {{ oportunidad.fecha_inicio|date:"d/m/Y" }} - {{ oportunidad.fecha_fin|date:"d/m/Y" }}
+                                    </p>
+                                    {% if oportunidad.horario %}
+                                        <p class="mb-0">
+                                            <strong><i class="far fa-clock me-1"></i> Horario:</strong> 
+                                            {{ oportunidad.horario }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
+                    <!-- Formulario para confirmar la inscripción -->
                     <form method="post" action="{% url 'inscripciones:inscribirse' oportunidad.id %}">
                         {% csrf_token %}
                         <div class="d-flex justify-content-between">
+                            <!-- Botón para volver atrás -->
                             <a href="{% url 'detalle_oportunidad' oportunidad.id %}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-1"></i> Volver
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-check-circle me-1"></i> Confirmar Inscripción
-                            </button>
+                            
+                            <!-- Botón de confirmación que cambia según disponibilidad -->
+                            {% if cupos_disponibles %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check-circle me-1"></i> Confirmar Inscripción
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-primary" disabled>
+                                    <i class="fas fa-ban me-1"></i> Sin cupos disponibles
+                                </button>
+                            {% endif %}
                         </div>
                     </form>
                 </div>
