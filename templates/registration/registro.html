@@ -1,12 +1,11 @@
+{% extends "base.html" %}
+{% load static %}
+
 {% comment %}
 Template de registro de voluntarios para RedSolidaria.
 Extiende la plantilla base y proporciona un formulario de registro con validación.
 Solo permite correos institucionales de la PUCE.
 {% endcomment %}
-
-{% extends "base.html" %}
-{# Carga las etiquetas estáticas para usar archivos estáticos #}
-{% load static %}
 
 {% block content %}
 <div class="container mt-5">
@@ -28,18 +27,30 @@ Solo permite correos institucionales de la PUCE.
                     </div>
 
                     {# Formulario de registro #}
-                    <form method="post" class="needs-validation" novalidate>
+                    <form id="registroForm" method="post" class="needs-validation" novalidate onsubmit="return validarFormulario()">
                         {# Token CSRF para protección contra ataques #}
                         {% csrf_token %}
                         
                         {# Muestra errores del formulario si existen #}
-                        {% if form.errors %}
+                        {% if form.non_field_errors %}
                             <div class="alert alert-danger">
-                                {% for field, errors in form.errors.items %}
-                                    {% for error in errors %}
-                                        {{ error }}<br>
-                                    {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <i class="fas fa-exclamation-circle me-2"></i>{{ error }}<br>
                                 {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        {# Mostrar errores generales del formulario #}
+                        {% if form.errors %}
+                            <div class="alert alert-warning">
+                                <strong>Por favor, corrija los siguientes errores:</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for field in form %}
+                                        {% for error in field.errors %}
+                                            <li><i class="fas fa-exclamation-triangle me-2"></i>{{ field.label }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
                             </div>
                         {% endif %}
 
@@ -47,32 +58,31 @@ Solo permite correos institucionales de la PUCE.
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="nombre_completo" class="form-label">Nombre Completo</label>
-                                    <input type="text" 
-                                           name="nombre_completo" 
-                                           class="form-control" 
-                                           id="nombre_completo" 
-                                           required
-                                           pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
-                                           placeholder="Ej: Juan Pérez">
-                                    <div class="invalid-feedback">
-                                        Por favor ingresa tu nombre completo (solo letras y espacios).
+                                    <label for="{{ form.nombre_completo.id_for_label }}" class="form-label">
+                                        {{ form.nombre_completo.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.nombre_completo }}
+                                    {% if form.nombre_completo.help_text %}
+                                        <small class="form-text text-muted">{{ form.nombre_completo.help_text }}</small>
+                                    {% endif %}
+                                    <div class="invalid-feedback" id="nombre_completo_error">
+                                        Por favor ingrese un nombre válido (solo letras y espacios, mínimo 5 caracteres).
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="telefono" class="form-label">Teléfono</label>
-                                    <input type="tel" 
-                                           name="telefono" 
-                                           class="form-control" 
-                                           id="telefono" 
-                                           pattern="^\+?1?\d{9,15}$"
-                                           placeholder="Ej: +593987654321">
-                                    <div class="form-text">Formato: +593987654321</div>
-                                    <div class="invalid-feedback">
-                                        Por favor ingresa un número de teléfono válido (9-15 dígitos).
+                                    <label for="{{ form.telefono.id_for_label }}" class="form-label">
+                                        {{ form.telefono.label }}
+                                    </label>
+                                    {{ form.telefono }}
+                                    {% if form.telefono.help_text %}
+                                        <small class="form-text text-muted">{{ form.telefono.help_text }}</small>
+                                    {% endif %}
+                                    <div class="invalid-feedback" id="telefono_error">
+                                        Formato de teléfono inválido. Use el formato: +593987654321
                                     </div>
                                 </div>
                             </div>
@@ -208,27 +218,179 @@ Solo permite correos institucionales de la PUCE.
 
 {# Script para la validación del formulario del lado del cliente #}
 <script>
-// Patrón de módulo IIFE para evitar la contaminación del ámbito global
-(function () {
-  'use strict'  // Habilita el modo estricto de JavaScript
-  
-  // Selecciona todos los formularios con la clase 'needs-validation'
-  var forms = document.querySelectorAll('.needs-validation')
-  
-  // Itera sobre cada formulario encontrado
-  Array.prototype.slice.call(forms)
-    .forEach(function (form) {
-      // Agrega un event listener para el evento submit
-      form.addEventListener('submit', function (event) {
-        // Si el formulario no es válido, previene el envío
-        if (!form.checkValidity()) {
-          event.preventDefault()
-          event.stopPropagation()
+function validarNombreCompleto(nombre) {
+    // Validar longitud
+    if (nombre.length < 5) {
+        return 'El nombre debe tener al menos 5 caracteres.';
+    }
+    if (nombre.length > 100) {
+        return 'El nombre no puede tener más de 100 caracteres.';
+    }
+    
+    // Validar caracteres permitidos
+    const caracteresPermitidos = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'.-]+$/;
+    if (!caracteresPermitidos.test(nombre)) {
+        return 'Solo se permiten letras, espacios y los siguientes caracteres: . - \'';
+    }
+    
+    // Validar que no sean solo espacios
+    if (nombre.replace(/\s+/g, '') === '') {
+        return 'El nombre no puede estar vacío.';
+    }
+    
+    // Validar que no sean caracteres repetidos
+    if (/(.)\1{4,}/.test(nombre.replace(/\s+/g, ''))) {
+        return 'El nombre no puede contener caracteres repetidos.';
+    }
+    
+    // Validar que tenga al menos un espacio (nombre y apellido)
+    if (!/\s/.test(nombre)) {
+        return 'Por favor ingrese su nombre completo (al menos un nombre y un apellido).';
+    }
+    
+    // Validar que no sean caracteres aleatorios
+    const palabras = nombre.split(/\s+/);
+    for (const palabra of palabras) {
+        if (palabra.length > 2 && !/[aeiouáéíóúAEIOUÁÉÍÓÚ]/.test(palabra)) {
+            return `"${palabra}" no parece ser un nombre válido.`;
         }
-        // Agrega la clase 'was-validated' para mostrar los mensajes de validación
-        form.classList.add('was-validated')
-      }, false)
-    })
-})()
+        if (palabra.length > 1 && new Set(palabra).size === 1) {
+            return `"${palabra}" no parece ser un nombre válido.`;
+        }
+    }
+    
+    return ''; // Válido
+}
+
+function validarFormulario() {
+    const form = document.getElementById('registroForm');
+    const nombreInput = form.querySelector('[name="nombre_completo"]');
+    const emailInput = form.querySelector('[name="email"]');
+    const telefonoInput = form.querySelector('[name="telefono"]');
+    
+    // Validar nombre
+    if (nombreInput) {
+        const nombre = nombreInput.value.trim();
+        const errorNombre = validarNombreCompleto(nombre);
+        if (errorNombre) {
+            alert(errorNombre);
+            nombreInput.focus();
+            return false;
+        }
+    }
+    
+    // Validar correo
+    if (emailInput) {
+        const email = emailInput.value.trim();
+        const emailValido = /^[a-zA-Z0-9._%+-]+@puce\.(edu\.)?ec$/.test(email);
+        if (!emailValido) {
+            alert('Por favor ingrese un correo institucional de la PUCE (@puce.edu.ec o @puce.ec)');
+            emailInput.focus();
+            return false;
+        }
+    }
+    
+    // Validar teléfono si se ingresó
+    if (telefonoInput && telefonoInput.value.trim() !== '') {
+        const telefono = telefonoInput.value.trim();
+        const telefonoValido = /^\+?[0-9\s-]{10,15}$/.test(telefono);
+        if (!telefonoValido) {
+            alert('Por favor ingrese un número de teléfono válido (formato: +593987654321)');
+            telefonoInput.focus();
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Patrón de módulo IIFE para validación en tiempo real
+(function() {
+    'use strict';
+    
+    // Validación personalizada para el nombre
+    function validarNombre(nombre) {
+        const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{5,100}$/;
+        return regex.test(nombre);
+    }
+    
+    // Validación personalizada para el teléfono
+    function validarTelefono(telefono) {
+        if (!telefono) return true; // Opcional
+        const regex = /^\+?[0-9\s-]{10,15}$/;
+        return regex.test(telefono);
+    }
+    
+    // Obtener los formularios a los que queremos agregar validación
+    var forms = document.querySelectorAll('.needs-validation');
+    
+    // Bucle sobre los formularios
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        // Validación en tiempo real para el nombre
+        const nombreInput = form.querySelector('[name="nombre_completo"]');
+        if (nombreInput) {
+            nombreInput.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    if (!validarNombre(this.value)) {
+                        this.setCustomValidity('El nombre debe contener solo letras y espacios (mínimo 5 caracteres)');
+                        document.getElementById('nombre_completo_error').style.display = 'block';
+                    } else {
+                        this.setCustomValidity('');
+                        document.getElementById('nombre_completo_error').style.display = 'none';
+                    }
+                } else {
+                    this.setCustomValidity('El nombre completo es obligatorio');
+                    document.getElementById('nombre_completo_error').style.display = 'block';
+                }
+            });
+        }
+        
+        // Validación en tiempo real para el teléfono
+        const telefonoInput = form.querySelector('[name="telefono"]');
+        if (telefonoInput) {
+            telefonoInput.addEventListener('input', function() {
+                if (this.value.length > 0 && !validarTelefono(this.value)) {
+                    this.setCustomValidity('Formato de teléfono inválido');
+                    document.getElementById('telefono_error').style.display = 'block';
+                } else {
+                    this.setCustomValidity('');
+                    document.getElementById('telefono_error').style.display = 'none';
+                }
+            });
+        }
+        
+        // Validación al enviar el formulario
+        form.addEventListener('submit', function(event) {
+            let formIsValid = true;
+            
+            // Validar nombre
+            if (nombreInput && !validarNombre(nombreInput.value)) {
+                nombreInput.setCustomValidity('El nombre debe contener solo letras y espacios (mínimo 5 caracteres)');
+                formIsValid = false;
+            }
+            
+            // Validar teléfono si se ingresó
+            if (telefonoInput && telefonoInput.value && !validarTelefono(telefonoInput.value)) {
+                telefonoInput.setCustomValidity('Formato de teléfono inválido');
+                formIsValid = false;
+            }
+            
+            if (!form.checkValidity() || !formIsValid) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Mostrar mensajes de error
+                if (nombreInput && !validarNombre(nombreInput.value)) {
+                    document.getElementById('nombre_completo_error').style.display = 'block';
+                }
+                if (telefonoInput && telefonoInput.value && !validarTelefono(telefonoInput.value)) {
+                    document.getElementById('telefono_error').style.display = 'block';
+                }
+            }
+            
+            form.classList.add('was-validated');
+        }, false);
+    });
+});
 </script>
 {% endblock %}

@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
     # Aplicaciones locales del proyecto
     'usuarios',           # Gestión de perfiles de usuarios y autenticación
     'oportunidades',      # Publicación y gestión de oportunidades de voluntariado

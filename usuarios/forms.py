@@ -2,6 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 # Importación del modelo de Usuario personalizado
 from .models import Usuario
@@ -18,9 +19,18 @@ class RegistroForm(UserCreationForm):
         label='Correo electrónico',
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'usuario@puce.edu.ec'
+            'placeholder': 'usuario@puce.edu.ec',
+            'pattern': '^[a-zA-Z0-9._%+-]+@puce\.(edu\.)?ec$',
+            'title': 'Debe ser un correo institucional de la PUCE (@puce.edu.ec o @puce.ec)'
         }),
-        help_text='Debe ser un correo institucional de la PUCE (@puce.edu.ec o @puce.ec)'
+        help_text='Debe ser un correo institucional de la PUCE (@puce.edu.ec o @puce.ec)',
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9._%+-]+@puce\\.(edu\\.)?ec$',
+                message='El correo debe ser de dominio @puce.edu.ec o @puce.ec',
+                code='correo_invalido'
+            )
+        ]
     )
     
     # Campo para el nombre completo del usuario
@@ -28,8 +38,24 @@ class RegistroForm(UserCreationForm):
         label='Nombre completo',
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Ingrese su nombre completo'
-        })
+            'placeholder': 'Ingrese su nombre completo',
+            'pattern': '^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{5,100}$',
+            'title': 'El nombre debe contener solo letras y espacios (mínimo 5 caracteres)'
+        }),
+        min_length=5,
+        max_length=100,
+        error_messages={
+            'required': 'El nombre completo es obligatorio',
+            'min_length': 'El nombre debe tener al menos 5 caracteres',
+            'max_length': 'El nombre no puede tener más de 100 caracteres'
+        },
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$',
+                message='El nombre solo puede contener letras y espacios',
+                code='nombre_invalido'
+            )
+        ]
     )
     
     # Campo opcional para el teléfono
@@ -38,9 +64,18 @@ class RegistroForm(UserCreationForm):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': '+593987654321'
+            'placeholder': '+593987654321',
+            'pattern': '^\+?[0-9\s-]{10,15}$',
+            'title': 'Formato: +593987654321 (incluir código de país)'
         }),
-        help_text='Formato: +593987654321 (incluir código de país)'
+        help_text='Formato: +593987654321 (incluir código de país, 10-15 dígitos)',
+        validators=[
+            RegexValidator(
+                regex='^\+?[0-9\s-]{10,15}$',
+                message='Formato de teléfono inválido. Use el formato: +593987654321',
+                code='telefono_invalido'
+            )
+        ]
     )
     
     # Campo para la contraseña con widget de tipo contraseña
@@ -64,6 +99,71 @@ class RegistroForm(UserCreationForm):
         })
     )
     
+    def clean_nombre_completo(self):
+        """
+        Validación personalizada para el campo nombre_completo.
+        Asegura que el nombre cumpla con el formato de un nombre real.
+        """
+        nombre = self.cleaned_data.get('nombre_completo', '').strip()
+        
+        # Validar longitud
+        if len(nombre) < 5:
+            raise forms.ValidationError('El nombre debe tener al menos 5 caracteres.')
+        if len(nombre) > 100:
+            raise forms.ValidationError('El nombre no puede tener más de 100 caracteres.')
+            
+        # Validar que solo contenga letras, espacios y caracteres especiales permitidos
+        if not all(c.isalpha() or c.isspace() or c in "'.-áéíóúÁÉÍÓÚñÑ" for c in nombre):
+            raise forms.ValidationError('El nombre solo puede contener letras, espacios y los siguientes caracteres: . - \'')
+            
+        # Validar que no sean solo espacios
+        if nombre.replace(' ', '') == '':
+            raise forms.ValidationError('El nombre no puede estar vacío.')
+            
+        # Validar que no sean caracteres repetidos (como 'aaaaa' o 'a a a a a')
+        import re
+        if re.search(r'^(.)\1{4,}$', nombre.replace(' ', '')):
+            raise forms.ValidationError('El nombre no puede contener caracteres repetidos.')
+            
+        # Validar que tenga al menos un espacio (nombre y apellido)
+        if ' ' not in nombre:
+            raise forms.ValidationError('Por favor ingrese su nombre completo (al menos un nombre y un apellido).')
+            
+        # Validar que no sean caracteres aleatorios (usando un patrón de letras seguidas)
+        palabras = nombre.split()
+        for palabra in palabras:
+            if len(palabra) > 2 and not any(c in 'aeiouáéíóúAEIOUÁÉÍÓÚ' for c in palabra):
+                raise forms.ValidationError(f'"{palabra}" no parece ser un nombre válido.')
+            if len(palabra) > 1 and len(set(palabra)) == 1:
+                raise forms.ValidationError(f'"{palabra}" no parece ser un nombre válido.')
+                
+        return nombre.title()  # Capitalizar correctamente el nombre
+
+    def clean_telefono(self):
+        """
+        Validación personalizada para el campo teléfono.
+        """
+        telefono = self.cleaned_data.get('telefono', '').strip()
+        if telefono:  # Es opcional, pero si se ingresa debe ser válido
+            if not telefono.startswith('+'):
+                telefono = '+' + telefono
+            if not telefono[1:].isdigit() or len(telefono) < 10 or len(telefono) > 16:
+                raise forms.ValidationError('Formato de teléfono inválido. Use el formato: +593987654321')
+        return telefono
+
+    def clean(self):
+        """
+        Validación adicional para el formulario completo.
+        """
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+        
+        if password1 and password2 and password1 != password2:
+            self.add_error('password2', 'Las contraseñas no coinciden.')
+        
+        return cleaned_data
+
     class Meta:
         """
         Clase Meta para configuraciones adicionales del formulario.
